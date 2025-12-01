@@ -2,35 +2,40 @@ package me.purnachandra;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-
+import java.util.Optional;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import me.purnachandra.db.UrlRepository;
+
 public class Main {
     public static void main(String[] args) {
 
         String startUrl = "https://purnachandra.me";
-        Queue<String> queue = new LinkedList<>();
-        HashSet<String> visited = new HashSet<>();
-        queue.offer(startUrl);
+        UrlRepository repo = new UrlRepository();
+        repo.addUrl(startUrl);
 
-        while (!queue.isEmpty()) {
-            String url = queue.poll();
-            System.out.println(url);
+        while (true) {
+            Optional<String> nextUrlOpt = repo.getNextPendingUrl();
+
+            if (nextUrlOpt.isEmpty()) {
+                System.out.println("No more URLs to crawl");
+                break;
+            }
+
+            String url = nextUrlOpt.get();
+            System.out.println("Crawling: "+url);
+
             List<String> obtainedUrl = LinkExtractor.extractLinks(url);
 
             for(String u:obtainedUrl) {
-                if(!visited.contains(u)) {
-                    visited.add(u);
-                    queue.add(u);
-                }
+                repo.addUrl(u);
             }
+
+            repo.markVisited(url);
         }
     }
 }
