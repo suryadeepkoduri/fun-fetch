@@ -1,7 +1,13 @@
 package me.purnachandra;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class Crawler {
     public static String getTitle(Document document) {
@@ -35,5 +41,21 @@ public class Crawler {
             return p.text();
 
         return "";
+    }
+
+    public static Document getDocument(String url) throws IOException {
+        return Jsoup.connect(url).get();
+    }
+
+    public static List<String> extractLinks(Document document) {
+        List<String> finalLinks = new ArrayList<>();
+        Elements links = document.select("a[href]");
+
+        for (Element link : links) {
+            String href = link.attr("abs:href");
+            finalLinks.add(href);
+        }
+
+        return finalLinks;
     }
 }

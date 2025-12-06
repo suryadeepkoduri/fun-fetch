@@ -15,6 +15,8 @@ public class UrlRepository {
                 CREATE TABLE IF NOT EXISTS urls(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     url TEXT UNIQUE,
+                    title TEXT,
+                    description TEXT,
                     status TEXT DEFAULT 'pending',
                     discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
@@ -53,13 +55,26 @@ public class UrlRepository {
         String sql = "SELECT url FROM urls WHERE status = 'pending' LIMIT 1";
 
         try (Statement stmt = Database.getConnection().createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-           if (rs.next()) {
+            if (rs.next()) {
                 return Optional.of(rs.getString("url"));
-           }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return Optional.empty();
+    }
+
+    public void addMetadata(String url, String title, String description) {
+        String sql = "UPDATE urls SET title=?,description=? WHERE url = ?";
+
+        try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
+            pstmt.setString(1, title);
+            pstmt.setString(2, description);
+            pstmt.setString(3, url);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

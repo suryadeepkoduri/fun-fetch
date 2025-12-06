@@ -1,13 +1,10 @@
 package me.purnachandra;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.jsoup.Jsoup;
+
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import me.purnachandra.db.UrlRepository;
 
@@ -27,35 +24,31 @@ public class Main {
             }
 
             String url = nextUrlOpt.get();
-            System.out.println("Crawling: "+url);
+            System.out.println("Crawling: " + url);
 
-            List<String> obtainedUrl = LinkExtractor.extractLinks(url);
+            Document document = null;
 
-            for(String u:obtainedUrl) {
-                repo.addUrl(u);
+            try {
+                document = Crawler.getDocument(url);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (document != null) {
+                List<String> obtainedUrl = Crawler.extractLinks(document);
+                String title = Crawler.getTitle(document);
+                System.out.println("Title: " + title);
+                String description = Crawler.getDescription(document);
+                System.out.println("Description: " + description);
+
+                for (String u : obtainedUrl) {
+                    repo.addUrl(u);
+                }
+
+                repo.addMetadata(url, title, description);
             }
 
             repo.markVisited(url);
         }
-    }
-}
-
-class LinkExtractor {
-    public static List<String> extractLinks(String url) {
-        List<String> finalLinks = new ArrayList<>();
-        try {
-            Document doc = Jsoup.connect(url).get();
-            Elements links = doc.select("a[href]");
-
-            for(Element link:links) {
-                String href = link.attr("abs:href");
-                finalLinks.add(href);
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return finalLinks;
     }
 }
