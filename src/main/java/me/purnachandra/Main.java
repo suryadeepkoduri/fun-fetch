@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.jsoup.nodes.Document;
 
+import me.purnachandra.crawler.Crawler;
+import me.purnachandra.crawler.UrlProcessor;
 import me.purnachandra.db.UrlRepository;
 
 public class Main {
@@ -24,12 +26,13 @@ public class Main {
             }
 
             String url = nextUrlOpt.get();
+            String processedUrl = UrlProcessor.process(url);
             System.out.println("Crawling: " + url);
 
             Document document = null;
 
             try {
-                document = Crawler.getDocument(url);
+                document = Crawler.getDocument(processedUrl);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -42,13 +45,14 @@ public class Main {
                 System.out.println("Description: " + description);
 
                 for (String u : obtainedUrl) {
-                    repo.addUrl(u);
+                    String cleanedUrl = UrlProcessor.process(u);
+                    repo.addUrl(cleanedUrl);
                 }
 
-                repo.addMetadata(url, title, description);
+                repo.addMetadata(processedUrl, title, description);
             }
 
-            repo.markVisited(url);
+            repo.markVisited(processedUrl);
         }
     }
 }

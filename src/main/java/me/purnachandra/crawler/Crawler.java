@@ -1,4 +1,4 @@
-package me.purnachandra;
+package me.purnachandra.crawler;
 
 import java.io.IOException;
 import java.util.ArrayList;
