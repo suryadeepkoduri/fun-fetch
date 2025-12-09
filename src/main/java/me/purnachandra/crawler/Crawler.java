@@ -15,7 +15,7 @@ public class Crawler {
         if (!title.isEmpty())
             return title;
 
-        title = document.getElementsByTag("h1").text();
+        title = document.selectFirst("h1").text();
         if (!title.isEmpty())
             return title;
 
@@ -41,6 +41,10 @@ public class Crawler {
             return p.text();
 
         return "";
+    }
+
+    public static String getContent(Document document) {
+        return document.body().text();
     }
 
     public static Document getDocument(String url) throws IOException {

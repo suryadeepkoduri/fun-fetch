@@ -13,9 +13,16 @@ import me.purnachandra.db.UrlRepository;
 public class Main {
     public static void main(String[] args) {
 
-        String startUrl = "https://purnachandra.me";
+        // String startUrl = "https://purnachandra.me";
+        String[] seedUrls = { "https://en.wikipedia.org/wiki/Main_Page", "https://dmoztools.net/",
+                "https://www.bbc.com", "https://www.reuters.com", "https://stackoverflow.com", "https://medium.com",
+                "https://developer.mozilla.org" };
         UrlRepository repo = new UrlRepository();
-        repo.addUrl(startUrl);
+        // repo.addUrl(startUrl);
+
+        for (String url : seedUrls) {
+            repo.addUrl(url);
+        }
 
         while (true) {
             Optional<String> nextUrlOpt = repo.getNextPendingUrl();
@@ -27,6 +34,8 @@ public class Main {
 
             String url = nextUrlOpt.get();
             String processedUrl = UrlProcessor.process(url);
+            if (processedUrl == null)
+                continue;
             System.out.println("Crawling: " + url);
 
             Document document = null;
@@ -40,16 +49,19 @@ public class Main {
             if (document != null) {
                 List<String> obtainedUrl = Crawler.extractLinks(document);
                 String title = Crawler.getTitle(document);
-                System.out.println("Title: " + title);
                 String description = Crawler.getDescription(document);
-                System.out.println("Description: " + description);
+                String content = Crawler.getContent(document);
 
                 for (String u : obtainedUrl) {
                     String cleanedUrl = UrlProcessor.process(u);
+
+                    if (cleanedUrl == null)
+                        continue;
+
                     repo.addUrl(cleanedUrl);
                 }
 
-                repo.addMetadata(processedUrl, title, description);
+                repo.addData(processedUrl, title, description, content);
             }
 
             repo.markVisited(processedUrl);

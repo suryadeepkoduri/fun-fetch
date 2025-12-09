@@ -14,9 +14,10 @@ public class UrlRepository {
         String sql = """
                 CREATE TABLE IF NOT EXISTS urls(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    url TEXT UNIQUE,
+                    url TEXT UNIQUE NOT NULL,
                     title TEXT,
                     description TEXT,
+                    content TEXT,
                     status TEXT DEFAULT 'pending',
                     discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
@@ -72,6 +73,20 @@ public class UrlRepository {
             pstmt.setString(1, title);
             pstmt.setString(2, description);
             pstmt.setString(3, url);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addData(String url, String title, String description, String content) {
+        String sql = "UPDATE urls SET title=?,description=?, content=? WHERE url = ?";
+
+        try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
+            pstmt.setString(1, title);
+            pstmt.setString(2, description);
+            pstmt.setString(3, content);
+            pstmt.setString(4, url);
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();

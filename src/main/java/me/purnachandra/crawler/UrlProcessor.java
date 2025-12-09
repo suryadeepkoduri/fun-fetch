@@ -12,7 +12,7 @@ public class UrlProcessor {
                     url.getHost(),
                     url.getPort(),
                     url.getPath(),
-                    null, // Remove query
+                    url.getQuery(),
                     null  // Remove fragment
             );
             return uri.toString();
