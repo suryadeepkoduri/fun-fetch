@@ -9,14 +9,19 @@ import org.jsoup.nodes.Document;
 import me.purnachandra.crawler.Crawler;
 import me.purnachandra.crawler.UrlProcessor;
 import me.purnachandra.db.UrlRepository;
+import me.purnachandra.index.IndexRepository;
+import me.purnachandra.index.Indexer;
 
 public class Main {
     public static void main(String[] args) {
+        IndexRepository.createTable();
 
         // String startUrl = "https://purnachandra.me";
-        String[] seedUrls = { "https://en.wikipedia.org/wiki/Main_Page", "https://dmoztools.net/",
-                "https://www.bbc.com", "https://www.reuters.com", "https://stackoverflow.com", "https://medium.com",
-                "https://developer.mozilla.org" };
+        // String[] seedUrls = { "https://en.wikipedia.org/wiki/Main_Page", "https://dmoztools.net/",
+        //         "https://www.bbc.com", "https://www.reuters.com", "https://stackoverflow.com", "https://medium.com",
+        //         "https://developer.mozilla.org" };
+
+        String[] seedUrls = { "https://www.bbc.com","https://developer.mozilla.org" };
         UrlRepository repo = new UrlRepository();
         // repo.addUrl(startUrl);
 
@@ -62,6 +67,8 @@ public class Main {
                 }
 
                 repo.addData(processedUrl, title, description, content);
+                int docId = repo.getIdByUrl(processedUrl);
+                Indexer.indexDocument(docId, title+" "+description+" "+content);
             }
 
             repo.markVisited(processedUrl);

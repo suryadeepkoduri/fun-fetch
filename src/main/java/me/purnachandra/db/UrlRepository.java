@@ -2,6 +2,7 @@ package me.purnachandra.db;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 
@@ -92,4 +93,23 @@ public class UrlRepository {
             e.printStackTrace();
         }
     }
+
+    public int getIdByUrl(String url) {
+        String sql = "SELECT id FROM urls WHERE url = ?";
+
+        try (PreparedStatement ps = Database.getConnection().prepareStatement(sql)) {
+            ps.setString(1, url);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return -1;
+    }
+
 }
