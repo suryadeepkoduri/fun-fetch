@@ -11,13 +11,13 @@ import org.jsoup.select.Elements;
 
 public class Crawler {
     public static String getTitle(Document document) {
-        String title = document.getElementsByTag("title").text();
-        if (!title.isEmpty())
-            return title;
+        Element titleElement = document.selectFirst("title");
+        if (titleElement != null && !titleElement.text().isEmpty())
+            return titleElement.text();
 
-        title = document.selectFirst("h1").text();
-        if (!title.isEmpty())
-            return title;
+        titleElement = document.selectFirst("h1");
+        if (titleElement != null && !titleElement.text().isEmpty())
+            return titleElement.text();
 
         return "";
     }
@@ -44,6 +44,7 @@ public class Crawler {
     }
 
     public static String getContent(Document document) {
+        document.select("script,style,nav,footer,header,aside").remove();
         return document.body().text();
     }
 

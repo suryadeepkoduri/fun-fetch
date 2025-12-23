@@ -1,6 +1,7 @@
 package me.purnachandra;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +22,7 @@ public class Main {
         //         "https://www.bbc.com", "https://www.reuters.com", "https://stackoverflow.com", "https://medium.com",
         //         "https://developer.mozilla.org" };
 
-        String[] seedUrls = { "https://www.bbc.com","https://developer.mozilla.org" };
+        String[] seedUrls = { "https://www.bbc.com","https://developer.mozilla.org","https://medium.com" };
         UrlRepository repo = new UrlRepository();
         // repo.addUrl(startUrl);
 
@@ -41,7 +42,7 @@ public class Main {
             String processedUrl = UrlProcessor.process(url);
             if (processedUrl == null)
                 continue;
-            System.out.println("Crawling: " + url);
+            System.out.println(LocalDateTime.now()+" Crawling: " + url);
 
             Document document = null;
 
@@ -68,6 +69,7 @@ public class Main {
 
                 repo.addData(processedUrl, title, description, content);
                 int docId = repo.getIdByUrl(processedUrl);
+                System.out.println(LocalDateTime.now()+" Indexing: " + processedUrl);
                 Indexer.indexDocument(docId, title+" "+description+" "+content);
             }
 
