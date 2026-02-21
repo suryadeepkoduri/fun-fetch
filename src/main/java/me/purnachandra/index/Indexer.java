@@ -38,7 +38,7 @@ public class Indexer {
         if (text == null || text.isEmpty())
             return;
 
-        String[] tokens = TOKEN.split(text.toLowerCase().trim());
+        String[] tokens = tokenize(text);
         Map<String, Integer> freqs = new HashMap<>();
 
         for (String t : tokens) {
@@ -50,5 +50,9 @@ public class Indexer {
         }
 
         IndexRepository.addIndex(docId, freqs);
+    }
+
+    public static String[] tokenize(String text) {
+        return TOKEN.split(text.toLowerCase().trim());
     }
 }
