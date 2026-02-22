@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jsoup.nodes.Document;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import me.purnachandra.crawler.Crawler;
 import me.purnachandra.crawler.UrlProcessor;
@@ -13,16 +15,21 @@ import me.purnachandra.db.UrlRepository;
 import me.purnachandra.index.IndexRepository;
 import me.purnachandra.index.Indexer;
 
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
+
         IndexRepository.createTable();
 
         // String startUrl = "https://purnachandra.me";
-        // String[] seedUrls = { "https://en.wikipedia.org/wiki/Main_Page", "https://dmoztools.net/",
-        //         "https://www.bbc.com", "https://www.reuters.com", "https://stackoverflow.com", "https://medium.com",
-        //         "https://developer.mozilla.org" };
+        // String[] seedUrls = { "https://en.wikipedia.org/wiki/Main_Page",
+        // "https://dmoztools.net/",
+        // "https://www.bbc.com", "https://www.reuters.com",
+        // "https://stackoverflow.com", "https://medium.com",
+        // "https://developer.mozilla.org" };
 
-        String[] seedUrls = { "https://www.bbc.com","https://developer.mozilla.org","https://medium.com" };
+        String[] seedUrls = { "https://www.bbc.com", "https://developer.mozilla.org", "https://medium.com" };
         UrlRepository repo = new UrlRepository();
         // repo.addUrl(startUrl);
 
@@ -42,7 +49,7 @@ public class Main {
             String processedUrl = UrlProcessor.process(url);
             if (processedUrl == null)
                 continue;
-            System.out.println(LocalDateTime.now()+" Crawling: " + url);
+            System.out.println(LocalDateTime.now() + " Crawling: " + url);
 
             Document document = null;
 
@@ -69,8 +76,8 @@ public class Main {
 
                 repo.addData(processedUrl, title, description, content);
                 int docId = repo.getIdByUrl(processedUrl);
-                System.out.println(LocalDateTime.now()+" Indexing: " + processedUrl);
-                Indexer.indexDocument(docId, title+" "+description+" "+content);
+                System.out.println(LocalDateTime.now() + " Indexing: " + processedUrl);
+                Indexer.indexDocument(docId, title + " " + description + " " + content);
             }
 
             repo.markVisited(processedUrl);
