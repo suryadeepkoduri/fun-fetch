@@ -14,7 +14,7 @@ public class UrlRepository {
     private void createTable() {
         String sql = """
                 CREATE TABLE IF NOT EXISTS urls(
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                     url TEXT UNIQUE NOT NULL,
                     title TEXT,
                     description TEXT,
@@ -32,7 +32,7 @@ public class UrlRepository {
     }
 
     public void addUrl(String url) {
-        String sql = "INSERT OR IGNORE INTO urls(url) VALUES(?)";
+        String sql = "INSERT INTO urls(url) VALUES(?) ON CONFLICT(url) DO NOTHING";
 
         try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
             pstmt.setString(1, url);
