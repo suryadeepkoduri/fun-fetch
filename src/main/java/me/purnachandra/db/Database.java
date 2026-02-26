@@ -1,13 +1,15 @@
 package me.purnachandra.db;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Database {
-    private static Connection connection;
+    private static HikariDataSource hikariDataSource;
     
     private static final Dotenv dotenv = Dotenv.load();
     
@@ -15,11 +17,21 @@ public class Database {
     private static final String user = dotenv.get("DB_USER");
     private static final String password = dotenv.get("DB_PASSWORD");
 
-    public static Connection getConnection() throws SQLException {
-        if (connection == null) {
-            connection = DriverManager.getConnection(url,user,password);
-        }
+    static {
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(url);
+        hikariConfig.setUsername(user);
+        hikariConfig.setPassword(password);
 
-        return connection;
+        hikariConfig.setMaximumPoolSize(20);
+        hikariConfig.setMinimumIdle(5);
+        hikariConfig.setConnectionTimeout(30000);
+        hikariConfig.setIdleTimeout(600000);
+        hikariConfig.setMaxLifetime(1800000);
+
+        hikariDataSource = new HikariDataSource(hikariConfig);
+    }
+    public static Connection getConnection() throws SQLException {
+        return hikariDataSource.getConnection();
     }
 }

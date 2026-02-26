@@ -18,9 +18,14 @@ import me.purnachandra.search.SearchService;
 public class SearchController {
 
     @GetMapping
-    public List<SearchResult> search(@RequestParam String q, @RequestParam(defaultValue = "10") int limit) throws SQLException {
-        Connection connection = Database.getConnection();
-        SearchService searchService = new SearchService(connection);
-        return searchService.search(q, limit);  
+    public List<SearchResult> search(@RequestParam String q, @RequestParam(defaultValue = "10") int limit) {
+        try (Connection conn = Database.getConnection()) {
+            SearchService searchService = new SearchService(conn);
+            return searchService.search(q, limit);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return List.of();
     }
 }

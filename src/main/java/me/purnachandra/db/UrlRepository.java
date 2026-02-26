@@ -1,5 +1,6 @@
 package me.purnachandra.db;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,7 +25,7 @@ public class UrlRepository {
                 );
                 """;
 
-        try (Statement stmt = Database.getConnection().createStatement()) {
+        try (Connection conn = Database.getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (Exception e) {
             e.printStackTrace();
@@ -34,7 +35,9 @@ public class UrlRepository {
     public void addUrl(String url) {
         String sql = "INSERT INTO urls(url) VALUES(?) ON CONFLICT(url) DO NOTHING";
 
-        try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
+        try (
+                Connection conn = Database.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, url);
             pstmt.executeUpdate();
         } catch (Exception e) {
@@ -45,7 +48,9 @@ public class UrlRepository {
     public void markVisited(String url) {
         String sql = "UPDATE urls SET status = 'visited' WHERE url = ?";
 
-        try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
+        try (
+                Connection conn = Database.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, url);
             pstmt.executeUpdate();
         } catch (Exception e) {
@@ -56,7 +61,9 @@ public class UrlRepository {
     public Optional<String> getNextPendingUrl() {
         String sql = "SELECT url FROM urls WHERE status = 'pending' LIMIT 1";
 
-        try (Statement stmt = Database.getConnection().createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+        try (Connection conn = Database.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
                 return Optional.of(rs.getString("url"));
             }
@@ -70,7 +77,7 @@ public class UrlRepository {
     public void addMetadata(String url, String title, String description) {
         String sql = "UPDATE urls SET title=?,description=? WHERE url = ?";
 
-        try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
+        try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, title);
             pstmt.setString(2, description);
             pstmt.setString(3, url);
@@ -83,7 +90,7 @@ public class UrlRepository {
     public void addData(String url, String title, String description, String content) {
         String sql = "UPDATE urls SET title=?,description=?, content=? WHERE url = ?";
 
-        try (PreparedStatement pstmt = Database.getConnection().prepareStatement(sql)) {
+        try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, title);
             pstmt.setString(2, description);
             pstmt.setString(3, content);
@@ -97,10 +104,10 @@ public class UrlRepository {
     public int getIdByUrl(String url) {
         String sql = "SELECT id FROM urls WHERE url = ?";
 
-        try (PreparedStatement ps = Database.getConnection().prepareStatement(sql)) {
-            ps.setString(1, url);
+        try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, url);
 
-            try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("id");
                 }
