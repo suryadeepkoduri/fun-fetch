@@ -10,9 +10,16 @@ import java.util.List;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import me.purnachandra.crawler.model.ParsedPage;
 
 public class PageParser {
+    private final Logger log = LoggerFactory.getLogger(PageParser.class);
+
     public ParsedPage parse(String url, Document document) {
+        log.info("Parsing {}", url);
         String title = getTitle(document);
         String description = getDescription(document);
         String content = getContent(document);

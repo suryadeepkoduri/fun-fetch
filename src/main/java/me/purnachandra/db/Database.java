@@ -13,15 +13,15 @@ public class Database {
     
     private static final Dotenv dotenv = Dotenv.load();
     
-    private static final String url = dotenv.get("DB_URL");
-    private static final String user = dotenv.get("DB_USER");
-    private static final String password = dotenv.get("DB_PASSWORD");
+    private static final String URL = dotenv.get("DB_URL");
+    private static final String USERNAME = dotenv.get("DB_USER");
+    private static final String PASSWORD = dotenv.get("DB_PASSWORD");
 
     static {
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(url);
-        hikariConfig.setUsername(user);
-        hikariConfig.setPassword(password);
+        hikariConfig.setJdbcUrl(URL);
+        hikariConfig.setUsername(USERNAME);
+        hikariConfig.setPassword(PASSWORD);
 
         hikariConfig.setMaximumPoolSize(20);
         hikariConfig.setMinimumIdle(5);

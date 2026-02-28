@@ -1,4 +1,4 @@
-package me.purnachandra.crawler;
+package me.purnachandra.crawler.model;
 
 import org.jsoup.nodes.Document;
 

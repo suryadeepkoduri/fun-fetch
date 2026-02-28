@@ -23,7 +23,6 @@ public class SearchController {
             SearchService searchService = new SearchService(conn);
             return searchService.search(q, limit);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return List.of();
