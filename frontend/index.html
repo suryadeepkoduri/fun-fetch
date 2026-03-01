@@ -3,59 +3,403 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fun Fetch</title>
+    <title>FunFetch</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
       rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous"
     />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0d0d0d;
+        --surface: #161616;
+        --border: #2a2a2a;
+        --accent: #e8ff47;
+        --accent2: #47ffe8;
+        --text: #f0f0f0;
+        --muted: #666;
+        --mono: "Space Mono", monospace;
+        --sans: "Syne", sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Grid background */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(232, 255, 71, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(232, 255, 71, 0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      #app {
+        position: relative;
+        z-index: 1;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      /* ── Hero ── */
+      .hero {
+        padding: 80px 0 48px;
+        transition: padding 0.4s ease;
+      }
+      .hero.compact {
+        padding: 32px 0 28px;
+      }
+
+      .logo {
+        font-family: var(--sans);
+        font-weight: 800;
+        font-size: clamp(42px, 8vw, 72px);
+        letter-spacing: -2px;
+        line-height: 1;
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+      }
+      .logo-fun {
+        color: var(--text);
+      }
+      .logo-fetch {
+        color: var(--accent);
+        position: relative;
+      }
+      .logo-fetch::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--accent);
+        opacity: 0.4;
+      }
+
+      .tagline {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: 8px;
+      }
+
+      /* ── Search bar ── */
+      .search-row {
+        display: flex;
+        gap: 0;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        transition: border-color 0.2s;
+      }
+      .search-row:focus-within {
+        border-color: var(--accent);
+      }
+
+      .search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 14px 16px;
+        font-family: var(--mono);
+        font-size: 14px;
+        color: var(--text);
+        caret-color: var(--accent);
+      }
+      .search-input::placeholder {
+        color: var(--muted);
+      }
+
+      .search-btn {
+        background: var(--accent);
+        border: none;
+        color: #000;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        padding: 0 20px;
+        cursor: pointer;
+        transition: background 0.15s;
+        white-space: nowrap;
+      }
+      .search-btn:hover {
+        background: #f5ff70;
+      }
+      .search-btn:active {
+        background: #d4e830;
+      }
+      .search-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* ── Status bar ── */
+      .status-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        min-height: 20px;
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--muted);
+        flex-shrink: 0;
+      }
+      .status-dot.loading {
+        background: var(--accent);
+        animation: pulse 1s ease-in-out infinite;
+      }
+      .status-dot.ok {
+        background: var(--accent2);
+      }
+      .status-dot.err {
+        background: #ff6b6b;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+
+      /* ── Results ── */
+      .results {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding-bottom: 60px;
+      }
+
+      .result-item {
+        border: 1.5px solid transparent;
+        padding: 16px;
+        background: var(--surface);
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+        animation: slideIn 0.2s ease both;
+      }
+      .result-item:hover {
+        border-color: var(--border);
+        background: #1e1e1e;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-rank {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      .result-title {
+        font-family: var(--sans);
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--text);
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+      }
+      .result-title:hover {
+        color: var(--accent);
+      }
+
+      .result-url {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .result-score {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: #000;
+        background: var(--accent);
+        padding: 1px 6px;
+        margin-top: 8px;
+        opacity: 0.85;
+      }
+
+      /* ── Empty / error ── */
+      .empty-state {
+        margin-top: 60px;
+        text-align: center;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 2;
+      }
+      .empty-big {
+        font-size: 48px;
+        display: block;
+        margin-bottom: 12px;
+        opacity: 0.3;
+      }
+    </style>
   </head>
   <body>
     <div id="app">
-      <h1 class="text-center mt-3">Fun Fetch</h1>
-
-      <div class="container">
-        <div class="d-flex justify-content-center gap-2">
-          <input v-model="query" placeholder="Search..." />
-          <button @click="search" class="btn btn-primary">Search</button>
+      <div :class="['hero', { compact: results.length > 0 || searched }]">
+        <div class="logo">
+          <span class="logo-fun">Fun</span><span class="logo-fetch">Fetch</span>
         </div>
+        <div class="tagline">// a search engine built from scratch</div>
+      </div>
 
-        <ul>
-          <li v-for="r in results" :key="r.docId">
-            <a :href="r.url" target="_blank">{{r.title}}</a>
-            (score: {{r.score}})
-          </li>
-        </ul>
+      <div class="search-row">
+        <input
+          class="search-input"
+          v-model="query"
+          placeholder="what are you looking for?"
+          @keydown.enter="search"
+          :disabled="loading"
+        />
+        <button
+          class="search-btn"
+          @click="search"
+          :disabled="loading || !query.trim()"
+        >
+          {{ loading ? '...' : 'Search' }}
+        </button>
+      </div>
+
+      <div class="status-bar">
+        <span v-if="loading">
+          <span class="status-dot loading"></span>
+          fetching results
+        </span>
+        <span v-else-if="error">
+          <span class="status-dot err"></span>
+          {{ error }}
+        </span>
+        <span v-else-if="searched && results.length > 0">
+          <span class="status-dot ok"></span>
+          {{ results.length }} result{{ results.length !== 1 ? 's' : '' }} for
+          "{{ lastQuery }}"
+        </span>
+        <span v-else-if="searched && results.length === 0">
+          <span class="status-dot"></span>
+          no results
+        </span>
+      </div>
+
+      <div class="results" v-if="results.length > 0">
+        <div
+          class="result-item"
+          v-for="(r, i) in results"
+          :key="r.docId"
+          :style="{ animationDelay: (i * 40) + 'ms' }"
+        >
+          <div class="result-rank">#{{ i + 1 }}</div>
+          <a class="result-title" :href="r.url" target="_blank"
+            >{{ r.title || r.url }}</a
+          >
+          <div class="result-url">{{ r.url }}</div>
+          <span class="result-score"
+            >score {{ typeof r.score === 'number' ? r.score.toFixed(4) : r.score
+            }}</span
+          >
+        </div>
+      </div>
+
+      <div class="empty-state" v-else-if="searched && !loading">
+        <span class="empty-big">∅</span>
+        no pages indexed for "{{ lastQuery }}"
       </div>
     </div>
 
     <script>
       const { createApp } = Vue;
-
       createApp({
         data() {
           return {
             query: "",
             results: [],
+            loading: false,
+            error: null,
+            searched: false,
+            lastQuery: "",
           };
         },
         methods: {
           async search() {
-            const res = await fetch(
-              `http://localhost:8080/search?q=${this.query}`,
-            );
-
-            this.results = await res.json();
+            const q = this.query.trim();
+            if (!q) return;
+            this.loading = true;
+            this.error = null;
+            this.lastQuery = q;
+            try {
+              const res = await fetch(
+                `http://localhost:8080/search?q=${encodeURIComponent(q)}`,
+              );
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              this.results = await res.json();
+              this.searched = true;
+            } catch (e) {
+              this.error = `couldn't reach backend — is it running? (${e.message})`;
+              this.results = [];
+            } finally {
+              this.loading = false;
+            }
           },
         },
       }).mount("#app");
     </script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-      crossorigin="anonymous"
-    ></script>
   </body>
 </html>
