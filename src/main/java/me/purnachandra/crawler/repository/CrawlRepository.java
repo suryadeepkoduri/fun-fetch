@@ -10,11 +10,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.purnachandra.crawler.model.CrawlJob;
 import me.purnachandra.crawler.model.ParsedPage;
 import me.purnachandra.db.Database;
 
 public class CrawlRepository {
+    private final Logger log = LoggerFactory.getLogger(CrawlRepository.class);
+
     public List<CrawlJob> getNextPendingBatch(int batchSize) {
         String sql = """
                 SELECT id,url,crawl_depth
@@ -38,8 +43,8 @@ public class CrawlRepository {
 
                 jobs.add(new CrawlJob(pageId, url, depth));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            log.error("Failed to fetch pending batch of size {}", batchSize, e);
         }
 
         return jobs;
@@ -66,7 +71,7 @@ public class CrawlRepository {
                 urlToId.put(rs.getString("url"), rs.getInt("id"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Batch insert failed for {} URLs at depth {}", depth, urls, e);
         }
 
         return urlToId;
@@ -88,25 +93,30 @@ public class CrawlRepository {
         try (Connection conn = Database.getConnection()) {
             conn.setAutoCommit(false);
 
-            try (PreparedStatement pstmt = conn.prepareStatement(updatePage)) {
-                pstmt.setString(1, parsedPage.title());
-                pstmt.setString(2, parsedPage.description());
-                pstmt.setString(3, parsedPage.contentHash());
-                pstmt.setInt(4, pageId);
+            try {
+                try (PreparedStatement pstmt = conn.prepareStatement(updatePage)) {
+                    pstmt.setString(1, parsedPage.title());
+                    pstmt.setString(2, parsedPage.description());
+                    pstmt.setString(3, parsedPage.contentHash());
+                    pstmt.setInt(4, pageId);
 
-                pstmt.executeUpdate();
+                    pstmt.executeUpdate();
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(insertContent)) {
+                    pstmt.setInt(1, pageId);
+                    pstmt.setString(2, parsedPage.content());
+
+                    pstmt.executeUpdate();
+                }
+
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                log.error("Failed to save crawl content for pageId {}, rolling back", pageId, e);
             }
-
-            try (PreparedStatement pstmt = conn.prepareStatement(insertContent)) {
-                pstmt.setInt(1, pageId);
-                pstmt.setString(2, parsedPage.content());
-
-                pstmt.executeUpdate();
-            }
-
-            conn.commit();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Failed to get connection for pageId: {}", pageId, e);
         }
     }
 
@@ -127,7 +137,7 @@ public class CrawlRepository {
                 urlToId.put(rs.getString("url"), rs.getInt("id"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Failed to fetch IDs for URLs: {}", urls.size(), e);
         }
 
         return urlToId;
@@ -151,7 +161,7 @@ public class CrawlRepository {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Failed to insert {} links from pageId {}", toIds.size(), fromId, e);
         }
     }
 
@@ -166,7 +176,7 @@ public class CrawlRepository {
             pstmt.setInt(1, pageId);
             pstmt.executeQuery();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Failed to mark pageId {} as failed", pageId, e);
         }
     }
 }

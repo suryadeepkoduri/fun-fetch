@@ -17,6 +17,7 @@ import me.purnachandra.crawler.model.ParsedPage;
 
 public class PageParser {
     private final Logger log = LoggerFactory.getLogger(PageParser.class);
+    private static final String CONTENT_ATTR = "content";
 
     public ParsedPage parse(String url, Document document) {
         log.info("Parsing {}", url);
@@ -42,15 +43,15 @@ public class PageParser {
 
     private static String getDescription(Document document) {
         // various methods for picking description if default description not found
-        String description = document.select("meta[name=description]").attr("content");
+        String description = document.select("meta[name=description]").attr(CONTENT_ATTR);
         if (!description.isEmpty())
             return description;
 
-        description = document.select("meta[property=og:description]").attr("content");
+        description = document.select("meta[property=og:description]").attr(CONTENT_ATTR);
         if (!description.isEmpty())
             return description;
 
-        description = document.select("meta[name=twitter:description]").attr("content");
+        description = document.select("meta[name=twitter:description]").attr(CONTENT_ATTR);
         if (!description.isEmpty())
             return description;
 
@@ -84,8 +85,7 @@ public class PageParser {
             byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return "";
+            throw new IllegalStateException("SHA-256 algorithm not available", e);
         }
     }
 }
