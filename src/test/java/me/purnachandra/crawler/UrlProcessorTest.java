@@ -8,53 +8,58 @@ class UrlProcessorTest {
 
     @Test
     void removeTrailingSlash() {
-        assertEquals("https://example.com/page", UrlProcessor.process("https://example.com/page/"));
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://example.com/page/"));
     }
 
     @Test
     void removeFragment() {
-        assertEquals("https://example.com/page", UrlProcessor.process("https://example.com/page#section"));
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://example.com/page#section"));
     }
 
     @Test
     void removeUtmParameters() {
         assertEquals("https://example.com/page",
-                UrlProcessor.process("https://example.com/page?utm_source=twitter&utm_medium=social"));
+                UrlProcessor.normalize("https://example.com/page?utm_source=twitter&utm_medium=social"));
     }
 
     @Test
     void removeFbclid() {
-        assertEquals("https://example.com/page", UrlProcessor.process("https://example.com/page?fbclid=abc123"));
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://example.com/page?fbclid=abc123"));
     }
 
     @Test
     void lowercaseUrl() {
-        assertEquals("https://example.com/page", UrlProcessor.process("https://EXAMPLE.COM/page"));
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://EXAMPLE.COM/page"));
     }
 
     @Test
     void removeWww() {
-        assertEquals("https://example.com/page", UrlProcessor.process("https://www.example.com/page"));
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://www.example.com/page"));
     }
 
     @Test
     void removeDefaultHttpPort() {
-        assertEquals("http://example.com/page", UrlProcessor.process("http://example.com:80/page"));
+        assertEquals("http://example.com/page", UrlProcessor.normalize("http://example.com:80/page"));
     }
 
     @Test
     void removeDefaultHttpsPort() {
-        assertEquals("https://example.com/page", UrlProcessor.process("https://example.com:443/page"));
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://example.com:443/page"));
     }
 
     @Test
     void sortQueryParameters() {
-        assertEquals("https://example.com/page?a=1&b=2", UrlProcessor.process("https://example.com/page?b=2&a=1"));
+        assertEquals("https://example.com/page?a=1&b=2", UrlProcessor.normalize("https://example.com/page?b=2&a=1"));
     }
 
     @Test
     void removeFragmentButKeepQueryParams() {
         assertEquals("https://example.com/page?q=search",
-                UrlProcessor.process("https://example.com/page?q=search#section"));
+                UrlProcessor.normalize("https://example.com/page?q=search#section"));
+    }
+
+    @Test
+    void keepNonDefaultPort() {
+        assertEquals("http://example.com:8080/page", UrlProcessor.normalize("http://example.com:8080/page"));
     }
 }

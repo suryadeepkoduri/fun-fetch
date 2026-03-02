@@ -74,7 +74,7 @@ public class CrawlerOrchestrator {
 
     private void processDiscoveredLinks(CrawlJob job, List<String> rawLinks) {
         List<String> cleanLinks = rawLinks.stream()
-                .map(UrlProcessor::process)
+                .map(UrlProcessor::normalize)
                 .filter(Objects::nonNull)
                 .distinct()
                 .toList();
