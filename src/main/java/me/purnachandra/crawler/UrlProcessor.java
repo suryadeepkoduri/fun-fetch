@@ -22,7 +22,7 @@ public class UrlProcessor {
                     url.getUserInfo(),
                     url.getHost().toLowerCase().replaceFirst("^www\\.", ""),
                     removeDefaultPort(url.getScheme(), url.getPort()),
-                    url.getPath().replaceAll("/+$", ""), // Remove trailing slashes
+                    removeTrailingSlashes(url.getPath()),
                     cleanQueryParam(url.getQuery()),
                     null // Remove fragment
             );
@@ -48,5 +48,12 @@ public class UrlProcessor {
 
     private static int removeDefaultPort(String scheme, int port) {
         return scheme.equals("http") && port == 80 || scheme.equals("https") && port == 443 ? -1 : port;
+    }
+
+    private static String removeTrailingSlashes(String path) {
+        while (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 }
