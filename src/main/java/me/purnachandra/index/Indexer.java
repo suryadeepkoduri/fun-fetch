@@ -15,44 +15,35 @@ public class Indexer {
             "having", "he", "he'd", "he'll", "he's", "her", "here", "here's", "hers", "herself", "him",
             "himself", "his", "how", "i", "i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's",
             "its", "itself", "just", "ll", "ma", "me", "mightn't", "more", "most", "mustn't", "my", "myself", "needn't",
-            "no",
-            "nor", "not", "now", "o'clock", "of", "off", "on", "once", "only", "or", "other", "our", "ours",
-            "ourselves",
-            "out", "over", "own", "re", "s", "same", "shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't",
+            "no", "nor", "not", "now", "o'clock", "of", "off", "on", "once", "only", "or", "other", "our", "ours",
+            "ourselves", "out", "over", "own", "re", "s", "same", "shan't", "she", "she'd", "she'll", "she's", "should",
+            "shouldn't",
             "so", "some", "such", "t", "than", "that", "that's", "the", "their", "theirs", "them", "themselves", "then",
             "there", "there's", "these", "they", "they'd", "they'll", "they're", "they've", "this", "those",
             "through", "to", "too", "under", "until", "up", "ve", "very", "was", "wasn't", "we",
-            "we'd", "we'll", "we're", "we've", "were", "weren't",
-            "what",
-            "when",
-            "where",
-            "which",
-            "while",
-            "who",
-            "whom",
-            "why",
-            "will",
-            "with");
+            "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "when", "where", "which", "while", "who",
+            "whom", "why", "will", "with");
 
-    public static void indexDocument(int docId, String text) {
-        if (text == null || text.isEmpty())
-            return;
-
-        String[] tokens = tokenize(text);
-        Map<String, Integer> freqs = new HashMap<>();
-
-        for (String t : tokens) {
-            if (t.isBlank() || t.length() <= 2 || STOP_WORDS.contains(t))
-                continue;
-
-            freqs.merge(t, 1, Integer::sum);
-
+    public Map<String, Integer> index(String content) {
+        if (content == null || content.isEmpty()) {
+            return new HashMap<>();
         }
 
-        IndexRepository.addIndex(docId, freqs);
+        String[] tokens = tokenize(content);
+        Map<String, Integer> freq = new HashMap<>();
+
+        for (String token : tokens) {
+            if (token.isBlank() || token.length() <= 2 || STOP_WORDS.contains(token)) {
+                continue;
+            }
+
+            freq.put(token, freq.getOrDefault(token, 0) + 1);
+        }
+
+        return freq;
     }
 
-    public static String[] tokenize(String text) {
+    private String[] tokenize(String text) {
         return TOKEN.split(text.toLowerCase().trim());
     }
 }
