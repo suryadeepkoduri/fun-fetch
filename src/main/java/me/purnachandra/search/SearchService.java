@@ -19,7 +19,7 @@ public class SearchService {
     }
 
     public List<SearchResult> search(String query, int limit) throws SQLException {
-        String[] terms = Indexer.tokenize(query);
+        String[] terms = query.toLowerCase().split("\\s+");
         Map<Integer, Double> scores = new HashMap<>();
 
         String sql = """

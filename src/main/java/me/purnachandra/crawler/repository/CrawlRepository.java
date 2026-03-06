@@ -90,6 +90,12 @@ public class CrawlRepository {
                 ON CONFLICT(page_id) DO UPDATE SET content=excluded.content
                 """;
 
+        String insertIndexingQueue = """
+                INSERT INTO indexing_queue(page_id,status)
+                VALUES(?, 'pending')
+                ON CONFLICT(page_id) DO NOTHING
+                """;
+
         try (Connection conn = Database.getConnection()) {
             conn.setAutoCommit(false);
 
@@ -107,6 +113,11 @@ public class CrawlRepository {
                     pstmt.setInt(1, pageId);
                     pstmt.setString(2, parsedPage.content());
 
+                    pstmt.executeUpdate();
+                }
+
+                try (PreparedStatement pstmt = conn.prepareStatement(insertIndexingQueue)) {
+                    pstmt.setInt(1, pageId);
                     pstmt.executeUpdate();
                 }
 

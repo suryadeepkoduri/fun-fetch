@@ -31,7 +31,7 @@ public class CrawlerOrchestrator {
         this.pageParser = pageParser;
         this.batchSize = batchSize;
         this.maxDepth = maxDepth;
-    }    
+    }
 
     public void start(List<String> seedUrls) {
         crawlRepository.batchInsertUrls(seedUrls, 0);
@@ -65,7 +65,6 @@ public class CrawlerOrchestrator {
 
         ParsedPage page = pageParser.parse(result.url(), result.document());
         crawlRepository.saveCrawlContent(job.pageId(), page);
-        // TODO: add indexing here
 
         if (job.depth() < maxDepth) {
             processDiscoveredLinks(job, page.outgoingLinks());
@@ -93,8 +92,8 @@ public class CrawlerOrchestrator {
 
         Map<String, Integer> existingIds = alreadyExisted.isEmpty() ? Map.of()
                 : crawlRepository.getIdsByUrls(alreadyExisted);
-        
-        Map<String,Integer> allIds = new HashMap<>();
+
+        Map<String, Integer> allIds = new HashMap<>();
         allIds.putAll(newIds);
         allIds.putAll(existingIds);
 
