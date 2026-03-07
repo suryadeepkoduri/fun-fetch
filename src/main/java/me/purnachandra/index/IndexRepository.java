@@ -8,9 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.purnachandra.db.Database;
 
 public class IndexRepository {
+    private final Logger log = LoggerFactory.getLogger(IndexRepository.class);
 
     public List<Integer> getNextPendingBatch(int batchSize) {
         String sql = "SELECT page_id FROM indexing_queue WHERE status='pending' LIMIT ?";
@@ -23,7 +27,7 @@ public class IndexRepository {
                 batch.add(rs.getInt("page_id"));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error fetching next pending batch", e);
         }
         return batch;
     }
@@ -53,7 +57,7 @@ public class IndexRepository {
             markIndexedPstmt.setInt(1, pageId);
             markIndexedPstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error adding index", e);
         }
     }
 
@@ -66,7 +70,7 @@ public class IndexRepository {
                 return rs.getString("content");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error fetching page content", e);
         }
         return "";
     }
@@ -88,7 +92,7 @@ public class IndexRepository {
             }
             return termToId;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error adding terms", e);
         }
         return new HashMap<>();
     }
@@ -108,7 +112,7 @@ public class IndexRepository {
                 termToId.put(rs.getString("term"), rs.getInt("id"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error fetching term IDs", e);
         }
         return termToId;
     }

@@ -4,12 +4,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import me.purnachandra.db.Database;
 
 @Service
 public class SearchService {
+    private final Logger log = LoggerFactory.getLogger(SearchService.class);
 
     public List<SearchResult> search(String query, int limit) {
 
@@ -51,7 +54,7 @@ public class SearchService {
                 results.add(result);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error executing search query", e);
         }
         return results;
     }
@@ -64,7 +67,7 @@ public class SearchService {
 
             return rs.getInt(1);
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error fetching total document count", e);
         }
 
         return 0;
