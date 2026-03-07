@@ -1,78 +1,72 @@
 package me.purnachandra.search;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import me.purnachandra.index.Indexer;
+import org.springframework.stereotype.Service;
 
+import me.purnachandra.db.Database;
+
+@Service
 public class SearchService {
-    private final Connection connection;
 
-    public SearchService(Connection connection) {
-        this.connection = connection;
-    }
+    public List<SearchResult> search(String query, int limit) {
 
-    public List<SearchResult> search(String query, int limit) throws SQLException {
         String[] terms = query.toLowerCase().split("\\s+");
-        Map<Integer, Double> scores = new HashMap<>();
 
-        String sql = """
-                SELECT doc_id, freq
-                FROM postings
-                WHERE term=?
-                """;
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            for (String term : terms) {
-                stmt.setString(1, term);
-                ResultSet rs = stmt.executeQuery();
-
-                while (rs.next()) {
-                    int docId = rs.getInt("doc_id");
-                    int freq = rs.getInt("freq");
-
-                    scores.merge(docId, (double) freq, Double::sum);
-                }
-            }
-        }
-
-        List<Map.Entry<Integer,Double>> ranked = new ArrayList<>(scores.entrySet());
-        ranked.sort((a,b) -> Double.compare(b.getValue(), a.getValue()));
-
+        int totalDocs = getTotalDocuments();
         List<SearchResult> results = new ArrayList<>();
 
-        String docSql = """
-                SELECT id, url, title
-                FROM urls
-                WHERE id=?
+        String sql = """
+                    SELECT
+                        p.id,
+                        p.url,
+                        p.title,
+                        SUM(po.freq * LN(?::float / NULLIF(t.doc_frequency, 0))) AS score
+                    FROM terms t
+                    JOIN postings po ON po.term_id = t.id
+                    JOIN pages p ON p.id = po.page_id
+                    WHERE t.term = ANY(?)
+                    GROUP BY p.id
+                    ORDER BY score DESC
+                    LIMIT ?
                 """;
-        
-        try (PreparedStatement stmt = connection.prepareStatement(docSql)) {
-            int count = 0;
-            for (Map.Entry<Integer, Double> entry : ranked)  {
-                if(count >= limit)
-                    break;
-                
-                stmt.setInt(1, entry.getKey());
-                ResultSet rs = stmt.executeQuery();
+        try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, totalDocs);
+            Array array = conn.createArrayOf("text", terms);
+            pstmt.setArray(2, array);
 
-                if (rs.next()) {
-                    results.add(new SearchResult(
-                            rs.getInt("id"),
-                            rs.getString("url"),
-                            rs.getString("title"),
-                            entry.getValue()
-                    ));
-                }
-                count++;
+            pstmt.setInt(3, limit);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                SearchResult result = new SearchResult(
+                        rs.getInt("id"),
+                        rs.getString("url"),
+                        rs.getString("title"),
+                        rs.getDouble("score"));
+
+                results.add(result);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return results;
+    }
+
+    private int getTotalDocuments() {
+        String sql = "SELECT COUNT(*) FROM indexing_queue WHERE status='indexed'";
+        try (Connection conn = Database.getConnection(); Statement stmt = conn.createStatement()) {
+            ResultSet rs = stmt.executeQuery(sql);
+            rs.next();
+
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 }

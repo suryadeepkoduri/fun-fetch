@@ -16,15 +16,15 @@ import me.purnachandra.search.SearchService;
 @RestController
 @RequestMapping("/search")
 public class SearchController {
+    private final SearchService searchService;
+
+    public SearchController(SearchService searchService) {
+        this.searchService = searchService;
+    }
 
     @GetMapping
-    public List<SearchResult> search(@RequestParam String q, @RequestParam(defaultValue = "10") int limit) {
-        try (Connection conn = Database.getConnection()) {
-            SearchService searchService = new SearchService(conn);
-            return searchService.search(q, limit);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return List.of();
+    public List<SearchResult> search(@RequestParam String q, @RequestParam(defaultValue = "10") int limit)
+            throws SQLException {
+        return searchService.search(q, limit);
     }
 }
