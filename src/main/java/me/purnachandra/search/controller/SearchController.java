@@ -1,4 +1,4 @@
-package me.purnachandra.controller;
+package me.purnachandra.search.controller;
 
 import java.util.List;
 
