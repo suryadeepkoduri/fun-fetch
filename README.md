@@ -146,7 +146,6 @@ Response:
 - Field weighting (title 3× body)
 - Stemming
 - `robots.txt` support
-- Snippet generation in search results
 
 **v3**
 - Simplified PageRank from `links` table
