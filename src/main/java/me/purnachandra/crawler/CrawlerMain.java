@@ -9,8 +9,10 @@ public class CrawlerMain {
         CrawlRepository crawlRepository = new CrawlRepository();
         PageFetcher pageFetcher = new PageFetcher(1000, 5000);
         PageParser pageParser = new PageParser();
+        RulesEngine rulesEngine = new RulesEngine();
 
-        CrawlerOrchestrator orchestrator = new CrawlerOrchestrator(crawlRepository, pageFetcher, pageParser, 3, 100);
+        CrawlerOrchestrator orchestrator = new CrawlerOrchestrator(crawlRepository, pageFetcher, pageParser,
+                rulesEngine, 3, 100);
         orchestrator.start(List.of("https://news.ycombinator.com",
                 "https://news.google.com", "https://www.reuters.com", "https://curlie.org", "https://www.w3.org",
                 "https://arxiv.org"));

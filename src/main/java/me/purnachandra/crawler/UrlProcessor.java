@@ -1,6 +1,7 @@
 package me.purnachandra.crawler;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -55,5 +56,24 @@ public class UrlProcessor {
             path = path.substring(0, path.length() - 1);
         }
         return path;
+    }
+
+    public static String getRobotUrl(String urlString) {
+        try {
+            URI url = new URI(urlString);
+            URI uri = new URI(
+                    url.getScheme(),
+                    url.getUserInfo(),
+                    url.getHost().toLowerCase().replaceFirst("^www\\.", ""),
+                    removeDefaultPort(url.getScheme(), url.getPort()),
+                    "/robots.txt",
+                    null,
+                    null);
+            return uri.toString();
+        } catch (URISyntaxException e) {
+            log.debug("Failed to create robot url from url:{} - {}", urlString, e.getMessage());
+        }
+
+        return null;
     }
 }

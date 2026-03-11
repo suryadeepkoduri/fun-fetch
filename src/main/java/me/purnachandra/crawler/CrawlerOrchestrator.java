@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +20,19 @@ public class CrawlerOrchestrator {
     private final CrawlRepository crawlRepository;
     private final PageFetcher pageFetcher;
     private final PageParser pageParser;
+    private final RulesEngine rulesEngine;
     private final int batchSize;
     private final int maxDepth;
 
     private final Logger log = LoggerFactory.getLogger(CrawlerOrchestrator.class);
 
     public CrawlerOrchestrator(CrawlRepository crawlRepository, PageFetcher pageFetcher, PageParser pageParser,
+            RulesEngine rulesEngine,
             int maxDepth, int batchSize) {
         this.crawlRepository = crawlRepository;
         this.pageFetcher = pageFetcher;
         this.pageParser = pageParser;
+        this.rulesEngine = rulesEngine;
         this.batchSize = batchSize;
         this.maxDepth = maxDepth;
     }
@@ -56,6 +60,13 @@ public class CrawlerOrchestrator {
     }
 
     private void process(CrawlJob job) {
+    
+        if (!rulesEngine.isAllowed(job.url())) {
+            log.info("Skipping url due to robots.txt rules: {}", job.url());
+            crawlRepository.markFailed(job.pageId());
+            return;
+        }
+
         FetchResult result = pageFetcher.fetch(job.url());
 
         if (!result.success()) {
