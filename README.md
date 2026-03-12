@@ -41,9 +41,11 @@ Seed URLs → Crawler → pages + page_content + links tables
 ### Search (`me.purnachandra.search`)
 
 - `SearchService` — executes TF-IDF query directly in SQL:
+
   ```
   score = SUM( freq * LN(totalDocs / doc_frequency) )
   ```
+
   Matches any query term, groups by page, orders by score descending
 - `SearchController` — `GET /search?q=<query>&limit=<n>` returns JSON array of results
 
@@ -119,6 +121,7 @@ GET http://localhost:8080/search?q=java+spring&limit=10
 ```
 
 Response:
+
 ```json
 [
   {
@@ -134,20 +137,23 @@ Response:
 
 ## Roadmap
 
-**v1**
+### v1 (Current)
+
 - BFS crawler with depth limit and politeness delays
 - Decoupled indexer via `indexing_queue`
 - TF-IDF scoring
 - Spring Boot REST search API
 
-**v2**
+### v2
+
 - Multi-threaded crawler with `ExecutorService`
 - BM25 ranking
 - Field weighting (title 3× body)
 - Stemming
 - `robots.txt` support
 
-**v3**
+### v3
+
 - Simplified PageRank from `links` table
 - Focused crawling with relevance scoring
 - Recrawl scheduling based on `last_crawled` and content change
