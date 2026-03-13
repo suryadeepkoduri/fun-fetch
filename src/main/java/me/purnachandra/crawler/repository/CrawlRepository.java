@@ -185,7 +185,7 @@ public class CrawlRepository {
 
         try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, pageId);
-            pstmt.executeQuery();
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             log.error("Failed to mark pageId {} as failed", pageId, e);
         }
