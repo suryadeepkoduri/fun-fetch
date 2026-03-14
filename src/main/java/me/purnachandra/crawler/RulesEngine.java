@@ -32,6 +32,7 @@ public class RulesEngine {
         return allowed;
     }
 
+    // TODO: add computeIfAbsent when implementing multi-threading to avoid multiple fetches for same robotUrl
     private BaseRobotRules getBaseRobotRules(String robotUrl) {
         if (rulesCache.containsKey(robotUrl)) {
             return rulesCache.get(robotUrl);

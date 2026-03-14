@@ -63,7 +63,7 @@ public class CrawlerOrchestrator {
     
         if (!rulesEngine.isAllowed(job.url())) {
             log.info("Skipping url due to robots.txt rules: {}", job.url());
-            crawlRepository.markFailed(job.pageId());
+            crawlRepository.markNotAllowed(job.pageId());
             return;
         }
 

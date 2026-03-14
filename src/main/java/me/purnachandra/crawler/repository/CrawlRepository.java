@@ -13,6 +13,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import me.purnachandra.crawler.CrawlStatus;
 import me.purnachandra.crawler.model.CrawlJob;
 import me.purnachandra.crawler.model.ParsedPage;
 import me.purnachandra.db.Database;
@@ -24,7 +25,7 @@ public class CrawlRepository {
         String sql = """
                 SELECT id,url,crawl_depth
                 FROM pages
-                WHERE status = 'pending'
+                WHERE status = 'pending' OR status='PENDING'
                 ORDER BY crawl_depth ASC
                 LIMIT ?
                 """;
@@ -80,7 +81,7 @@ public class CrawlRepository {
     public void saveCrawlContent(int pageId, ParsedPage parsedPage) {
         String updatePage = """
                 UPDATE pages
-                SET title=?, description=?,status='crawled',content_hash=?,last_crawled=NOW()
+                SET title=?, description=?,status=?,content_hash=?,last_crawled=NOW()
                 where id=?
                 """;
 
@@ -103,8 +104,9 @@ public class CrawlRepository {
                 try (PreparedStatement pstmt = conn.prepareStatement(updatePage)) {
                     pstmt.setString(1, parsedPage.title());
                     pstmt.setString(2, parsedPage.description());
-                    pstmt.setString(3, parsedPage.contentHash());
-                    pstmt.setInt(4, pageId);
+                    pstmt.setString(3, CrawlStatus.SUCCESS.name());
+                    pstmt.setString(4, parsedPage.contentHash());
+                    pstmt.setInt(5, pageId);
 
                     pstmt.executeUpdate();
                 }
@@ -179,15 +181,32 @@ public class CrawlRepository {
     public void markFailed(int pageId) {
         String sql = """
                 UPDATE pages
-                SET status='failed',last_crawled=NOW()
+                SET status=?,last_crawled=NOW()
                 WHERE id=?
                 """;
 
         try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, pageId);
+            pstmt.setString(1, CrawlStatus.FAILED.name());
+            pstmt.setInt(2, pageId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             log.error("Failed to mark pageId {} as failed", pageId, e);
+        }
+    }
+
+    public void markNotAllowed(int pageId) {
+        String sql = """
+                UPDATE pages
+                SET status=?,last_crawled=NOW()
+                WHERE id=?
+                """;
+
+        try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, CrawlStatus.NOT_ALLOWED.name());
+            pstmt.setInt(2, pageId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Failed to mark pageId {} as not allowed", pageId, e);
         }
     }
 }
