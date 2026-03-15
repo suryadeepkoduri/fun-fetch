@@ -9,7 +9,8 @@ public class CrawlerMain {
         CrawlRepository crawlRepository = new CrawlRepository();
         PageFetcher pageFetcher = new PageFetcher(1000, 5000);
         PageParser pageParser = new PageParser();
-        RulesEngine rulesEngine = new RulesEngine();
+        RobotsFetcher robotsFetcher = new RobotsFetcher();
+        RulesEngine rulesEngine = new RulesEngine(robotsFetcher);
 
         CrawlerOrchestrator orchestrator = new CrawlerOrchestrator(crawlRepository, pageFetcher, pageParser,
                 rulesEngine, 3, 100);

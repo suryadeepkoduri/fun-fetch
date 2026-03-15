@@ -17,10 +17,10 @@ public class RulesEngine {
 
     private final Logger log = LoggerFactory.getLogger(RulesEngine.class);
 
-    public RulesEngine() {
+    public RulesEngine(RobotsFetcher robotsFetcher) {
         parser = new SimpleRobotRulesParser();
         useragent = List.of("funfetchbot");
-        robotsFetcher = new RobotsFetcher();
+        this.robotsFetcher = robotsFetcher;
         rulesCache = new ConcurrentHashMap<>();
     }
 
