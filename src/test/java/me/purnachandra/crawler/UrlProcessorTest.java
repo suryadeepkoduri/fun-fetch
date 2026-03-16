@@ -1,6 +1,7 @@
 package me.purnachandra.crawler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -61,5 +62,66 @@ class UrlProcessorTest {
     @Test
     void keepNonDefaultPort() {
         assertEquals("http://example.com:8080/page", UrlProcessor.normalize("http://example.com:8080/page"));
+    }
+
+    @Test
+    void normalize_nullInput_returnsNull() {
+        assertNull(UrlProcessor.normalize(null));
+    }
+
+    @Test
+    void normalize_malformedUrl_returnsNull() {
+        assertNull(UrlProcessor.normalize("not a url"));
+    }
+
+    @Test
+    void normalize_removesUtmButKeepsOtherParams() {
+        assertEquals(
+                "https://example.com/page?q=search",
+                UrlProcessor.normalize("https://example.com/page?q=search&utm_source=twitter"));
+    }
+
+    @Test
+    void normalize_removesFbclidButKeepsOtherParams() {
+        assertEquals(
+                "https://example.com/page?q=search",
+                UrlProcessor.normalize("https://example.com/page?q=search&fbclid=abc123"));
+    }
+
+    @Test
+    void normalize_multipleTrailingSlashes() {
+        assertEquals("https://example.com/page", UrlProcessor.normalize("https://example.com/page///"));
+    }
+
+    @Test
+    void getRobotUrl_returnsRobotsTextPath() {
+        assertEquals("https://example.com/robots.txt", UrlProcessor.getRobotUrl("https://example.com/some/page"));
+    }
+
+    @Test
+    void getRobotUrl_stripsWww() {
+        assertEquals("https://example.com/robots.txt", UrlProcessor.getRobotUrl("https://www.example.com/page"));
+    }
+
+    @Test
+    void getRobotUrl_lowercasesHost() {
+        assertEquals("https://example.com/robots.txt", UrlProcessor.getRobotUrl("https://EXAMPLE.COM/page"));
+    }
+
+    @Test
+    void getRobotUrl_stripsQueryParams() {
+        assertEquals("https://example.com/robots.txt", UrlProcessor.getRobotUrl("https://example.com/page?q=search"));
+    }
+
+    @Test
+    void getRobotUrl_stripsFragment() {
+        assertEquals("https://example.com/robots.txt", UrlProcessor.getRobotUrl("https://example.com/page#section"));
+    }
+
+    @Test
+    void getRobotUrl_sameDomainDifferentPaths_returnsSameRobotsUrl() {
+        assertEquals(
+                UrlProcessor.getRobotUrl("https://example.com/page1"),
+                UrlProcessor.getRobotUrl("https://example.com/page2"));
     }
 }
