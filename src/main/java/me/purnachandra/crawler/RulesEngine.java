@@ -26,6 +26,11 @@ public class RulesEngine {
 
     public boolean isAllowed(String url) {
         String robotUrl = UrlProcessor.getRobotUrl(url);
+
+        if (robotUrl == null) {
+            return false;
+        }
+        
         BaseRobotRules rules = getBaseRobotRules(robotUrl);
         boolean allowed = rules.isAllowed(url);
         log.info("Rules check for url:{} allowed:{}", url, allowed);
