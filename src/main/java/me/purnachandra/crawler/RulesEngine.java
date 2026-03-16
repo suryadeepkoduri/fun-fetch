@@ -32,15 +32,10 @@ public class RulesEngine {
         return allowed;
     }
 
-    // TODO: add computeIfAbsent when implementing multi-threading to avoid multiple fetches for same robotUrl
     private BaseRobotRules getBaseRobotRules(String robotUrl) {
-        if (rulesCache.containsKey(robotUrl)) {
-            return rulesCache.get(robotUrl);
-        }
-
-        byte[] robotContent = robotsFetcher.fetch(robotUrl);
-        BaseRobotRules robotRules = parser.parseContent(robotUrl, robotContent, "text/plain", useragent);
-        rulesCache.put(robotUrl, robotRules);
-        return robotRules;
+        return rulesCache.computeIfAbsent(robotUrl, url -> {
+            byte[] robotContent = robotsFetcher.fetch(url);
+            return parser.parseContent(url, robotContent, "text/plain", useragent);
+        });
     }
 }
