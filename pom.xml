@@ -12,6 +12,8 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <java.version>21</java.version>
+
+        <sonar.exclusions>src/main/java/org/tartarus/**</sonar.exclusions>
     </properties>
 
     <parent>
