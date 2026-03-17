@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
 import org.tartarus.snowball.ext.englishStemmer;
 
 public class Indexer {
