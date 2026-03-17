@@ -1,9 +1,12 @@
 package me.purnachandra.index;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.tartarus.snowball.ext.englishStemmer;
 
 public class Indexer {
     private static final Pattern TOKEN = Pattern.compile("\\W+");
@@ -24,26 +27,37 @@ public class Indexer {
             "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "when", "where", "which", "while", "who",
             "whom", "why", "will", "with");
 
+    private final englishStemmer stemmer = new englishStemmer();
+
     public Map<String, Integer> index(String content) {
         if (content == null || content.isEmpty()) {
             return new HashMap<>();
         }
 
-        String[] tokens = tokenize(content);
+        List<String> tokens = tokenize(content);
         Map<String, Integer> freq = new HashMap<>();
 
         for (String token : tokens) {
-            if (token.isBlank() || token.length() <= 2 || STOP_WORDS.contains(token)) {
-                continue;
-            }
-
             freq.put(token, freq.getOrDefault(token, 0) + 1);
         }
 
         return freq;
     }
 
-    private String[] tokenize(String text) {
-        return TOKEN.split(text.toLowerCase().trim());
+    private List<String> tokenize(String text) {
+        return Arrays.stream(TOKEN.split(text.toLowerCase()))
+                .filter(w -> !w.isEmpty())
+                .filter(w -> w.length() > 2)
+                .filter(w -> !STOP_WORDS.contains(w))
+                .map(this::stem)
+                .toList();
+    }
+
+    private String stem(String word) {
+        stemmer.setCurrent(word);
+        if (stemmer.stem()) {
+            return stemmer.getCurrent();
+        }
+        return word;
     }
 }
