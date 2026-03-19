@@ -70,7 +70,7 @@ public class IndexRepository {
                 return rs.getString("content");
             }
         } catch (Exception e) {
-            log.error("Error fetching page content", e);
+            log.error("Error fetching page content for page ID {}", pageId, e);
         }
         return "";
     }
