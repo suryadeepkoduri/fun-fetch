@@ -1,3 +1,5 @@
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/suryadeepkoduri/fun-fetch/blob/main/LICENSE)
+
 # FunFetch
 
 A search engine built from scratch in Java — BFS web crawler, inverted-index indexer, and TF-IDF search API.
