@@ -1,4 +1,7 @@
-![GitHub Release](https://img.shields.io/github/v/release/suryadeepkoduri/fun-fetch?include_prereleases) ![License](https://img.shields.io/github/license/suryadeepkoduri/fun-fetch)
+![GitHub Release](https://img.shields.io/github/v/release/suryadeepkoduri/fun-fetch?include_prereleases)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/suryadeepkoduri/fun-fetch/maven.yml)
+![Codecov](https://img.shields.io/codecov/c/gh/suryadeepkoduri/fun-fetch)
+![License](https://img.shields.io/github/license/suryadeepkoduri/fun-fetch)
 
 # FunFetch
 
