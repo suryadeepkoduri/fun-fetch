@@ -49,6 +49,7 @@ public class Indexer {
         return Arrays.stream(TOKEN.split(text.toLowerCase()))
                 .filter(w -> !w.isEmpty())
                 .filter(w -> w.length() > 2)
+                .filter(w -> !w.matches("\\d+"))
                 .filter(w -> !STOP_WORDS.contains(w))
                 .map(this::stem)
                 .toList();

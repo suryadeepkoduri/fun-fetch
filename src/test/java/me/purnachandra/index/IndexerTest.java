@@ -78,11 +78,8 @@ class IndexerTest {
 
     @Test
     void index_withNumbers_excludesThemFromIndex() {
-        // Single number tokens like "42" have length <= 2, longer ones pass length
-        // check
-        // but this verifies pure numeric strings are handled without crashing
         Map<String, Integer> result = indexer.index("123 456 789");
-        assertEquals(3, result.size()); // length > 2, not stop words — they get indexed
+        assertTrue(result.isEmpty());
     }
 
     @Test
