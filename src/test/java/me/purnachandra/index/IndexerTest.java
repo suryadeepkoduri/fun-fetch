@@ -116,4 +116,48 @@ class IndexerTest {
         assertEquals(1, result.get("search"));
         assertEquals(1, result.get("engin"));
     }
+
+    @Test
+    void index_withInflectedVerbs_stemsToPresentForm() {
+        // running, runs, ran all stem to "run"
+        Map<String, Integer> result = indexer.index("running runs");
+        assertEquals(1, result.size());
+        assertTrue(result.containsKey("run"));
+    }
+
+    @Test
+    void index_withPluralNouns_stemsToSingularForm() {
+        // crawlers → crawler, engines → engin, searches → search
+        Map<String, Integer> result = indexer.index("crawlers engines searches");
+        assertEquals(3, result.size());
+        assertTrue(result.containsKey("crawler"));
+        assertTrue(result.containsKey("engin"));
+        assertTrue(result.containsKey("search"));
+    }
+
+    @Test
+    void index_withAdjectiveForms_stemsCorrectly() {
+        // "happiness" → "happi", "quickly" → "quick"
+        Map<String, Integer> result = indexer.index("happiness quickly");
+        assertEquals(2, result.size());
+        assertTrue(result.containsKey("happi"));
+        assertTrue(result.containsKey("quick"));
+    }
+
+    @Test
+    void index_withStemCollision_countsCollapsedFormsAsSingleTerm() {
+        // "index", "indexing", "indexed", "indexes" should all stem to same term
+        Map<String, Integer> result = indexer.index("index indexing indexed indexes");
+        assertEquals(1, result.size());
+        assertEquals(4, result.get("index"));
+    }
+
+    @Test
+    void index_withIrregularVerbs_stemsToBaseForm() {
+        // "flies" → "fli" in Snowball Porter2 — counterintuitive but correct for this
+        // stemmer
+        Map<String, Integer> result = indexer.index("flies");
+        assertEquals(1, result.size());
+        assertTrue(result.containsKey("fli"));
+    }
 }
