@@ -1,12 +1,8 @@
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/suryadeepkoduri/fun-fetch/blob/main/LICENSE)
+![GitHub Release](https://img.shields.io/github/v/release/suryadeepkoduri/fun-fetch?include_prereleases) ![License](https://img.shields.io/github/license/suryadeepkoduri/fun-fetch)
 
 # FunFetch
 
-A search engine built from scratch in Java — BFS web crawler, inverted-index indexer, and TF-IDF search API.
-
-Built as a learning project to understand how search engines actually work, from crawling to ranking.
-
----
+A search engine built from scratch in Java. Built for understanding how search engines actually work, from crawling to ranking.
 
 ## What it does
 
@@ -135,29 +131,13 @@ Response:
 ]
 ```
 
----
-
 ## Roadmap
 
-### v1 (Current)
-
-- BFS crawler with depth limit and politeness delays
-- Decoupled indexer via `indexing_queue`
-- TF-IDF scoring
-- Spring Boot REST search API
-
-### v2
-
-- Multi-threaded crawler with `ExecutorService`
-- BM25 ranking
-- Field weighting (title 3× body)
-- Stemming
-- `robots.txt` support
-
-### v3
-
-- Simplified PageRank from `links` table
-- Focused crawling with relevance scoring
-- Recrawl scheduling based on `last_crawled` and content change
-- Hybrid BM25 + PageRank scoring
-- `/stats` endpoint with benchmark numbers
+- [ ] Multi-threaded crawler
+- [ ] BM25 ranking algorithm
+- [x] Stemming
+- [x] `robots.txt` support
+- [ ] Field weighting (title 3x body)
+- [ ] Simplified PageRank
+- [ ] Hybrid BM25 + PageRank scoring
+- [ ] `/stats` endpoint with benchmark numbers
