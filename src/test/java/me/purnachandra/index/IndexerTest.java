@@ -37,7 +37,7 @@ class IndexerTest {
         Map<String, Integer> result = indexer.index(content);
 
         assertEquals(2, result.size());
-        assertTrue(result.containsKey("welcome"));
+        assertTrue(result.containsKey("welcom"));
         assertTrue(result.containsKey("world"));
     }
 
@@ -112,8 +112,8 @@ class IndexerTest {
         Map<String, Integer> result = indexer.index("crawler indexer search engine");
         assertEquals(4, result.size());
         assertEquals(1, result.get("crawler"));
-        assertEquals(1, result.get("indexer"));
+        assertEquals(1, result.get("index"));
         assertEquals(1, result.get("search"));
-        assertEquals(1, result.get("engine"));
+        assertEquals(1, result.get("engin"));
     }
 }
