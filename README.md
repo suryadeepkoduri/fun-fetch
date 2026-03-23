@@ -20,8 +20,6 @@ Seed URLs → Crawler → pages + page_content + links tables
                               GET /search?q=java → ranked results
 ```
 
----
-
 ## Architecture
 
 ### Crawler (`me.purnachandra.crawler`)
@@ -50,8 +48,6 @@ Seed URLs → Crawler → pages + page_content + links tables
   Matches any query term, groups by page, orders by score descending
 - `SearchController` — `GET /search?q=<query>&limit=<n>` returns JSON array of results
 
----
-
 ## Database Schema
 
 ```sql
@@ -66,16 +62,12 @@ terms          (id, term, doc_frequency)
 postings       (term_id → terms.id, page_id → pages.id, freq)
 ```
 
----
-
 ## Stack
 
 - **Java 21** · **Spring Boot** — REST API
 - **PostgreSQL** (Neon serverless) — storage
 - **HikariCP** — connection pooling
 - **Jsoup** — HTML fetching and parsing
-
----
 
 ## Running it
 
