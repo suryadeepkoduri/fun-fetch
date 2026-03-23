@@ -21,6 +21,9 @@ public class TFIDFAlgorithm implements SearchService {
 
         int totalDocs = getTotalDocuments();
         List<SearchResult> results = new ArrayList<>();
+        if (totalDocs == 0) {
+            return results;
+        }
 
         String sql = """
                     SELECT
