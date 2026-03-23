@@ -23,8 +23,8 @@ public class PageParser {
         log.info("Parsing {}", url);
         String title = getTitle(document);
         String description = getDescription(document);
-        String content = getContent(document);
         List<String> links = extractLinks(document);
+        String content = getContent(document);
         String contentHash = sha256(content);
         return new ParsedPage(url, title, description, content, contentHash, links);    
     }

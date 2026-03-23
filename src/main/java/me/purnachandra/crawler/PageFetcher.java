@@ -2,6 +2,7 @@ package me.purnachandra.crawler;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,6 +27,12 @@ public class PageFetcher {
     }
 
     public FetchResult fetch(String url) {
+        String scheme = extractScheme(url);
+        if (scheme == null || (!scheme.equals("http") && !scheme.equals("https"))) {
+            log.warn("FETCH REJECTED non-HTTP(S) scheme url:{}", url);
+            return new FetchResult(url, null, false, "Unsupported scheme: " + scheme);
+        }
+
         enforcePoliteness(extractDomain(url));
         long start = System.currentTimeMillis();
 
@@ -64,6 +71,14 @@ public class PageFetcher {
             return new URI(url).getHost();
         } catch (Exception e) {
             return url;
+        }
+    }
+
+    private String extractScheme(String url) {
+        try {
+            return new URI(url).getScheme();
+        } catch (URISyntaxException | IllegalArgumentException e) {
+            return null;
         }
     }
 }
