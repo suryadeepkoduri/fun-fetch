@@ -76,4 +76,15 @@ public class UrlProcessor {
 
         return null;
     }
+
+    public static String extractScheme(String urlString) {
+        try {
+            URI url = new URI(urlString);
+            return url.getScheme();
+        } catch (URISyntaxException e) {
+            log.debug("Failed to extract protocol from URL:{} - {}", urlString, e.getMessage());
+        }
+
+        return null;
+    }
 }
