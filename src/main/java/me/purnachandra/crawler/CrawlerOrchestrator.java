@@ -86,6 +86,7 @@ public class CrawlerOrchestrator {
         List<String> cleanLinks = rawLinks.stream()
                 .map(UrlProcessor::normalize)
                 .filter(Objects::nonNull)
+                .filter(rulesEngine::isAllowed)
                 .distinct()
                 .toList();
 
