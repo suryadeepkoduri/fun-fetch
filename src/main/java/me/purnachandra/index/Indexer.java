@@ -28,7 +28,8 @@ public class Indexer {
             "we'd", "we'll", "we're", "we've", "were", "weren't", "what", "when", "where", "which", "while", "who",
             "whom", "why", "will", "with");
 
-    private final englishStemmer stemmer = new englishStemmer();
+    private static final ThreadLocal<englishStemmer> STEMMER =
+            ThreadLocal.withInitial(englishStemmer::new);
 
     public Map<String, Integer> index(String content) {
         if (content == null || content.isEmpty()) {
@@ -56,6 +57,7 @@ public class Indexer {
     }
 
     private String stem(String word) {
+        englishStemmer stemmer = STEMMER.get();
         stemmer.setCurrent(word);
         if (stemmer.stem()) {
             return stemmer.getCurrent();

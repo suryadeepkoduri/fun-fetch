@@ -25,7 +25,7 @@ public class CrawlRepository {
         String sql = """
                 SELECT id,url,crawl_depth
                 FROM pages
-                WHERE status = 'pending' OR status='PENDING'
+                WHERE status = 'PENDING'
                 ORDER BY crawl_depth ASC
                 LIMIT ?
                 """;

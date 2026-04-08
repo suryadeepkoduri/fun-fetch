@@ -35,7 +35,11 @@ public class IndexOrchestrator {
             log.info("Indexing pageId: {}", pageId);
             Map<String, Integer> freqs = indexer.index(indexRepository.fetchPageContent(pageId));
 
-            indexRepository.addIndex(pageId, freqs);
+            boolean success = indexRepository.addIndex(pageId, freqs);
+            if (!success) {
+                log.warn("Indexing failed for pageId: {}, marking as failed", pageId);
+                indexRepository.markIndexingFailed(pageId);
+            }
         }
     }
 }

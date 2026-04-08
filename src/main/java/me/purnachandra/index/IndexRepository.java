@@ -32,12 +32,13 @@ public class IndexRepository {
         return batch;
     }
 
-    public void addIndex(int pageId, Map<String, Integer> freqs) {
+    public boolean addIndex(int pageId, Map<String, Integer> freqs) {
         Map<String, Integer> allTerms = addTerms(new ArrayList<>(freqs.keySet()));
 
         String sql = """
                 INSERT INTO postings(term_id,page_id,freq)
                 SELECT unnest(?::int[]),?,unnest(?::int[])
+                ON CONFLICT(term_id,page_id) DO UPDATE SET freq = excluded.freq
                 """;
 
         String markIndexedSql = "UPDATE indexing_queue SET status='indexed' WHERE page_id=?";
@@ -56,8 +57,10 @@ public class IndexRepository {
             pstmt.executeUpdate();
             markIndexedPstmt.setInt(1, pageId);
             markIndexedPstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             log.error("Error adding index", e);
+            return false;
         }
     }
 
@@ -95,6 +98,16 @@ public class IndexRepository {
             log.error("Error adding terms", e);
         }
         return new HashMap<>();
+    }
+
+    public void markIndexingFailed(int pageId) {
+        String sql = "UPDATE indexing_queue SET status='failed' WHERE page_id=?";
+        try (Connection conn = Database.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, pageId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error marking indexing as failed for page ID {}", pageId, e);
+        }
     }
 
     public Map<String, Integer> getTermIds(List<String> terms) {
