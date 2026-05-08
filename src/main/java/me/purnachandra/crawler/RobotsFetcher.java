@@ -23,6 +23,7 @@ public class RobotsFetcher {
                     .GET()
                     .build();
 
+            log.info("Fetched robots.txt for {}", url);
             return client.send(request, HttpResponse.BodyHandlers.ofByteArray()).body();
         } catch (IOException e) {
             log.error("IOException while fetching robots.txt from url:{}", url, e);
