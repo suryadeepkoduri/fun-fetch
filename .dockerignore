@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+*.iml
+frontend
+README.md
+LICENSE
+todo.md
+**/target
+.env
