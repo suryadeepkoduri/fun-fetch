@@ -6,20 +6,37 @@ import java.sql.SQLException;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import io.github.cdimascio.dotenv.DotenvException;
+
 public class Database {
+    private Database() {
+        /* This utility class should not be instantiated */
+    }
+
     private static HikariDataSource hikariDataSource;
 
-    private static String getEnv(String key, String fallback) {
+    private static String env(String key) {
         String val = System.getenv(key);
-        return val != null && !val.isBlank() ? val : fallback;
+
+        if (val != null && !val.isBlank())
+            return val;
+
+        try {
+            return Dotenv.load().get(key);
+        } catch (DotenvException e) {
+            throw new IllegalStateException(
+                    "Missing required env var '" + key + "'. " +
+                            "Set it as an environment variable (Docker/prod) or in .env (local dev).",
+                    e);
+        }
     }
 
     static {
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(getEnv("DB_URL", "jdbc:postgresql://localhost:5432/funfetch"));
-        hikariConfig.setUsername(getEnv("DB_USER", "funfetch"));
-        hikariConfig.setPassword(getEnv("DB_PASSWORD", "funfetch"));
-        hikariConfig.setDriverClassName("org.postgresql.Driver");
+        hikariConfig.setJdbcUrl(env("DB_URL"));
+        hikariConfig.setUsername(env("DB_USER"));
+        hikariConfig.setPassword(env("DB_PASSWORD"));
 
         hikariConfig.setMaximumPoolSize(20);
         hikariConfig.setMinimumIdle(5);
