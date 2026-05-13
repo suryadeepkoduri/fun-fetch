@@ -3,136 +3,93 @@
 ![Codecov](https://img.shields.io/codecov/c/gh/suryadeepkoduri/fun-fetch)
 ![License](https://img.shields.io/github/license/suryadeepkoduri/fun-fetch)
 
+
+
 # FunFetch
 
-A search engine built from scratch in Java. Built for understanding how search engines actually work, from crawling to ranking.
+A search engine built from scratch in Java. FunFetch crawls the web,indexes content into an inverted index, and serves ranked results over a REST API.
 
-## What it does
 
-FunFetch crawls a set of seed URLs, stores discovered pages in PostgreSQL, indexes their content into an inverted index, and answers search queries ranked by TF-IDF.
 
-```
-Seed URLs → Crawler → pages + page_content + links tables
-                    → indexing_queue
-                              ↓
-                          Indexer → terms + postings tables
-                                           ↓
-                              GET /search?q=java → ranked results
-```
+https://github.com/user-attachments/assets/9ebd1f8a-7369-4a18-bbfe-9c845e393863
+
+
+
+
 
 ## Architecture
+```mermaid
+flowchart LR
+    seed([Seed URLs])
 
-### Crawler (`me.purnachandra.crawler`)
+    subgraph Crawler
+        bfs[BFS · robots.txt]
+    end
 
-- `CrawlerOrchestrator` — main BFS loop; pulls pending URLs in batches, processes each page
-- `PageFetcher` — fetches pages via Jsoup with per-domain politeness delay and configurable timeout
-- `PageParser` — extracts title, description, body content, outgoing links, and SHA-256 content hash
-- `UrlProcessor` — normalises URLs (lowercased, fragment-stripped, trailing-slash normalised)
-- `RulesEngine` — filters out non-crawlable URLs
-- `CrawlRepository` — all DB writes; uses PostgreSQL `UNNEST` for batch inserts, `RETURNING id` to avoid extra lookups, transactional save for page + content + indexing_queue
+    subgraph DB[PostgreSQL]
+        pages[(pages\nlinks)]
+        queue[(indexing\nqueue)]
+        idx[(terms\npostings)]
+    end
 
-### Indexer (`me.purnachandra.index`)
+    subgraph Indexer
+        stem[tokenize\nstem · index]
+    end
 
-- `IndexOrchestrator` — reads from `indexing_queue`, processes pages in batches
-- `Indexer` — tokenises content (lowercase, split on `\W+`), removes stop words and short tokens, returns term → frequency map
-- `IndexRepository` — upserts into `terms` (updating `doc_frequency`) and `postings`
+    subgraph API[Search API]
+        tfidf[TF-IDF\nREST]
+    end
 
-### Search (`me.purnachandra.search`)
-
-- `SearchService` — executes TF-IDF query directly in SQL:
-
-  ```
-  score = SUM( freq * LN(totalDocs / doc_frequency) )
-  ```
-
-  Matches any query term, groups by page, orders by score descending
-- `SearchController` — `GET /search?q=<query>&limit=<n>` returns JSON array of results
-
-## Database Schema
-
-```sql
--- Crawl
-pages          (id, url, title, description, status, content_hash, crawl_depth, first_discovered, last_crawled)
-page_content   (page_id → pages.id, content)
-links          (from_id → pages.id, to_id → pages.id)
-
--- Index pipeline
-indexing_queue (page_id → pages.id, status, queued_at, completed_at, error, retry_count)
-terms          (id, term, doc_frequency)
-postings       (term_id → terms.id, page_id → pages.id, freq)
+    seed --> bfs --> pages
+    bfs --> queue --> stem --> idx --> tfidf
+    client([GET /search]) --> tfidf
 ```
-
-## Stack
-
-- **Java 21** · **Spring Boot** — REST API
-- **PostgreSQL** (Neon serverless) — storage
-- **HikariCP** — connection pooling
-- **Jsoup** — HTML fetching and parsing
-
-## Running it
-
-### Prerequisites
-
-- Java 21+
-- Maven
-- PostgreSQL database (see schema above)
-
-### Setup
-
+## Quick Start
+**Prerequisites:** a PostgreSQL database (Postgres is not included in docker-compose)
 ```bash
-# Clone
 git clone https://github.com/suryadeepkoduri/fun-fetch.git
 cd fun-fetch
-
-# Configure DB
 cp .env.example .env
-# Edit .env and set DB_URL, DB_USER, DB_PASSWORD
+
+# fill in DB_URL, DB_USER, DB_PASSWORD
 ```
 
-### Run the crawler
-
+### With Docker (recommended)
 ```bash
-mvn exec:java -Dexec.mainClass="me.purnachandra.crawler.CrawlerMain"
+docker-compose up --build
 ```
+All three services start. The schema is created automatically by Flyway on first run.
 
-### Run the indexer
-
+### Without Docker
 ```bash
-mvn exec:java -Dexec.mainClass="me.purnachandra.index.IndexMain"
+mvn clean package -DskipTests
+ 
+java -jar search-api/target/search-api-1.0-SNAPSHOT.jar
+java -jar crawler/target/crawler-1.0-SNAPSHOT.jar
+java -jar indexer/target/indexer-1.0-SNAPSHOT.jar
 ```
+## Usage
 
-### Run the search API
-
+```
+GET /search?q=<query>&limit=<n>
+```
+ 
 ```bash
-mvn spring-boot:run
+curl "http://localhost:8080/search?q=java+streams&limit=5"
 ```
-
-### Search
-
-```
-GET http://localhost:8080/search?q=java+spring&limit=10
-```
-
-Response:
-
+ 
 ```json
 [
   {
     "id": 42,
-    "url": "https://example.com/java-guide",
-    "title": "Java Spring Boot Guide",
-    "score": 4.87
+    "url": "https://example.com/java-streams-guide",
+    "title": "Java Streams — A Complete Guide",
+    "score": 6.21
   }
 ]
 ```
 
-## Roadmap
+## Contributing
 
-- [ ] Multi-threaded crawler
-- [ ] BM25 ranking algorithm
-- [x] Stemming
-- [x] `robots.txt` support
-- [ ] Field weighting (title 3x body)
-- [ ] Simplified PageRank
-- [ ] Hybrid BM25 + PageRank scoring
-- [ ] `/stats` endpoint with benchmark numbers
+Suggestions, bug reports, and pull requests are welcome. [Open an issue](https://github.com/suryadeepkoduri/fun-fetch/issues) to discuss what you'd like to change before submitting a PR
+
