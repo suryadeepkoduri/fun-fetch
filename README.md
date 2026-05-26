@@ -3,19 +3,11 @@
 ![Codecov](https://img.shields.io/codecov/c/gh/suryadeepkoduri/fun-fetch)
 ![License](https://img.shields.io/github/license/suryadeepkoduri/fun-fetch)
 
-
-
 # FunFetch
 
 A search engine built from scratch in Java. FunFetch crawls the web,indexes content into an inverted index, and serves ranked results over a REST API.
 
-
-
 https://github.com/user-attachments/assets/9ebd1f8a-7369-4a18-bbfe-9c845e393863
-
-
-
-
 
 ## Architecture
 
@@ -49,6 +41,7 @@ flowchart LR
 ## Quick Start
 
 **Prerequisites:** a PostgreSQL database (Postgres is not included in docker-compose)
+
 ```bash
 git clone https://github.com/suryadeepkoduri/fun-fetch.git
 cd fun-fetch
