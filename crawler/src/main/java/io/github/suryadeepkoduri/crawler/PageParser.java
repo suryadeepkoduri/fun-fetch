@@ -1,21 +1,20 @@
 package io.github.suryadeepkoduri.crawler;
 
+import io.github.suryadeepkoduri.crawler.model.ParsedPage;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.suryadeepkoduri.crawler.model.ParsedPage;
-
 public class PageParser {
+
     private final Logger log = LoggerFactory.getLogger(PageParser.class);
     private static final String CONTENT_ATTR = "content";
 
@@ -26,38 +25,49 @@ public class PageParser {
         String content = getContent(document);
         List<String> links = extractLinks(document);
         String contentHash = sha256(content);
-        return new ParsedPage(url, title, description, content, contentHash, links);    
+        return new ParsedPage(
+            url,
+            title,
+            description,
+            content,
+            contentHash,
+            links
+        );
     }
 
     private static String getTitle(Document document) {
         Element titleElement = document.selectFirst("title");
-        if (titleElement != null && !titleElement.text().isEmpty())
-            return titleElement.text();
+        if (
+            titleElement != null && !titleElement.text().isEmpty()
+        ) return titleElement.text();
 
         titleElement = document.selectFirst("h1");
-        if (titleElement != null && !titleElement.text().isEmpty())
-            return titleElement.text();
+        if (
+            titleElement != null && !titleElement.text().isEmpty()
+        ) return titleElement.text();
 
         return "";
     }
 
     private static String getDescription(Document document) {
         // various methods for picking description if default description not found
-        String description = document.select("meta[name=description]").attr(CONTENT_ATTR);
-        if (!description.isEmpty())
-            return description;
+        String description = document
+            .select("meta[name=description]")
+            .attr(CONTENT_ATTR);
+        if (!description.isEmpty()) return description;
 
-        description = document.select("meta[property=og:description]").attr(CONTENT_ATTR);
-        if (!description.isEmpty())
-            return description;
+        description = document
+            .select("meta[property=og:description]")
+            .attr(CONTENT_ATTR);
+        if (!description.isEmpty()) return description;
 
-        description = document.select("meta[name=twitter:description]").attr(CONTENT_ATTR);
-        if (!description.isEmpty())
-            return description;
+        description = document
+            .select("meta[name=twitter:description]")
+            .attr(CONTENT_ATTR);
+        if (!description.isEmpty()) return description;
 
         Element p = document.selectFirst("p");
-        if (p != null)
-            return p.text();
+        if (p != null) return p.text();
 
         return "";
     }
@@ -82,10 +92,15 @@ public class PageParser {
     private String sha256(String content) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+            byte[] hash = digest.digest(
+                content.getBytes(StandardCharsets.UTF_8)
+            );
             return HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("SHA-256 algorithm not available", e);
+            throw new IllegalStateException(
+                "SHA-256 algorithm not available",
+                e
+            );
         }
     }
 }

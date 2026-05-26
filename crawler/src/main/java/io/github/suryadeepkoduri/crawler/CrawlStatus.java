@@ -4,5 +4,5 @@ public enum CrawlStatus {
     SUCCESS,
     FAILED,
     PENDING,
-    NOT_ALLOWED
+    NOT_ALLOWED,
 }

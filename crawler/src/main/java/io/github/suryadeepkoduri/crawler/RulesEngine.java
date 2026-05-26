@@ -1,15 +1,14 @@
 package io.github.suryadeepkoduri.crawler;
 
+import crawlercommons.robots.BaseRobotRules;
+import crawlercommons.robots.SimpleRobotRulesParser;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import crawlercommons.robots.BaseRobotRules;
-import crawlercommons.robots.SimpleRobotRulesParser;
-
 public class RulesEngine {
+
     private final SimpleRobotRulesParser parser;
     private final List<String> useragent;
     private final RobotsFetcher robotsFetcher;
@@ -30,7 +29,7 @@ public class RulesEngine {
         if (robotUrl == null) {
             return false;
         }
-        
+
         BaseRobotRules rules = getBaseRobotRules(robotUrl);
         boolean allowed = rules.isAllowed(url);
         log.info("Rules check for url:{} allowed:{}", url, allowed);
@@ -40,7 +39,12 @@ public class RulesEngine {
     private BaseRobotRules getBaseRobotRules(String robotUrl) {
         return rulesCache.computeIfAbsent(robotUrl, url -> {
             byte[] robotContent = robotsFetcher.fetch(url);
-            return parser.parseContent(url, robotContent, "text/plain", useragent);
+            return parser.parseContent(
+                url,
+                robotContent,
+                "text/plain",
+                useragent
+            );
         });
     }
 }

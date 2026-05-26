@@ -62,7 +62,7 @@ All three services start. The schema is created automatically by Flyway on first
 
 ```bash
 mvn clean package -DskipTests
- 
+
 java -jar search-api/target/search-api-1.3.0.jar
 java -jar crawler/target/crawler-1.3.0.jar
 java -jar indexer/target/indexer-1.3.0.jar

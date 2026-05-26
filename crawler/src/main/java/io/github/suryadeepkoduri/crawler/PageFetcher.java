@@ -1,18 +1,17 @@
 package io.github.suryadeepkoduri.crawler;
 
+import io.github.suryadeepkoduri.crawler.model.FetchResult;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.suryadeepkoduri.crawler.model.FetchResult;
-
 public class PageFetcher {
+
     private final Map<String, Long> lastFetchTime;
     private final long politenessDelayMs;
     private final int timeoutMs;
@@ -31,22 +30,28 @@ public class PageFetcher {
 
         try {
             Document document = Jsoup.connect(url)
-                    .userAgent("FunFetch/1.0 (learning project)")
-                    .timeout(timeoutMs)
-                    .get();
+                .userAgent("FunFetch/1.0 (learning project)")
+                .timeout(timeoutMs)
+                .get();
             long elapsed = System.currentTimeMillis() - start;
             log.info("FETCH OK url:{} duration:{} ms", url, elapsed);
             return new FetchResult(url, document, true, null);
         } catch (IOException e) {
-            long elapsed = System.currentTimeMillis()-start;
-            log.warn("FETCH FAIL url:{} duration:{}ms error:{}",url,elapsed,e.getMessage());
+            long elapsed = System.currentTimeMillis() - start;
+            log.warn(
+                "FETCH FAIL url:{} duration:{}ms error:{}",
+                url,
+                elapsed,
+                e.getMessage()
+            );
             return new FetchResult(url, null, false, e.getMessage());
         }
     }
 
     private void enforcePoliteness(String domain) {
         long lastFetch = lastFetchTime.getOrDefault(domain, 0L);
-        long waitNeeded = politenessDelayMs - (System.currentTimeMillis() - lastFetch);
+        long waitNeeded =
+            politenessDelayMs - (System.currentTimeMillis() - lastFetch);
 
         if (waitNeeded > 0) {
             try {

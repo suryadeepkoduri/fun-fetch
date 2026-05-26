@@ -1,10 +1,10 @@
 package io.github.suryadeepkoduri.crawler;
 
+import io.github.suryadeepkoduri.crawler.repository.CrawlRepository;
 import java.util.List;
 
-import io.github.suryadeepkoduri.crawler.repository.CrawlRepository;
-
 public class CrawlerMain {
+
     public static void main(String[] args) {
         CrawlRepository crawlRepository = new CrawlRepository();
         PageFetcher pageFetcher = new PageFetcher(1000, 5000);
@@ -12,10 +12,23 @@ public class CrawlerMain {
         RobotsFetcher robotsFetcher = new RobotsFetcher();
         RulesEngine rulesEngine = new RulesEngine(robotsFetcher);
 
-        CrawlerOrchestrator orchestrator = new CrawlerOrchestrator(crawlRepository, pageFetcher, pageParser,
-                rulesEngine, 3, 100);
-        orchestrator.start(List.of("https://news.ycombinator.com",
-                "https://news.google.com", "https://www.reuters.com", "https://curlie.org", "https://www.w3.org",
-                "https://arxiv.org"));
+        CrawlerOrchestrator orchestrator = new CrawlerOrchestrator(
+            crawlRepository,
+            pageFetcher,
+            pageParser,
+            rulesEngine,
+            3,
+            100
+        );
+        orchestrator.start(
+            List.of(
+                "https://news.ycombinator.com",
+                "https://news.google.com",
+                "https://www.reuters.com",
+                "https://curlie.org",
+                "https://www.w3.org",
+                "https://arxiv.org"
+            )
+        );
     }
 }

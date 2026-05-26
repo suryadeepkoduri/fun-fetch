@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class IndexerTest {
+
     private Indexer indexer;
 
     @BeforeEach
@@ -106,7 +106,9 @@ class IndexerTest {
 
     @Test
     void index_withMultipleDistinctWords_countsEachSeparately() {
-        Map<String, Integer> result = indexer.index("crawler indexer search engine");
+        Map<String, Integer> result = indexer.index(
+            "crawler indexer search engine"
+        );
         assertEquals(4, result.size());
         assertEquals(1, result.get("crawler"));
         assertEquals(1, result.get("index"));
@@ -125,7 +127,9 @@ class IndexerTest {
     @Test
     void index_withPluralNouns_stemsToSingularForm() {
         // crawlers → crawler, engines → engin, searches → search
-        Map<String, Integer> result = indexer.index("crawlers engines searches");
+        Map<String, Integer> result = indexer.index(
+            "crawlers engines searches"
+        );
         assertEquals(3, result.size());
         assertTrue(result.containsKey("crawler"));
         assertTrue(result.containsKey("engin"));
@@ -144,7 +148,9 @@ class IndexerTest {
     @Test
     void index_withStemCollision_countsCollapsedFormsAsSingleTerm() {
         // "index", "indexing", "indexed", "indexes" should all stem to same term
-        Map<String, Integer> result = indexer.index("index indexing indexed indexes");
+        Map<String, Integer> result = indexer.index(
+            "index indexing indexed indexes"
+        );
         assertEquals(1, result.size());
         assertEquals(4, result.get("index"));
     }

@@ -1,5 +1,9 @@
 package io.github.suryadeepkoduri.crawler;
 
+import io.github.suryadeepkoduri.crawler.model.CrawlJob;
+import io.github.suryadeepkoduri.crawler.model.FetchResult;
+import io.github.suryadeepkoduri.crawler.model.ParsedPage;
+import io.github.suryadeepkoduri.crawler.repository.CrawlRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,16 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.github.suryadeepkoduri.crawler.model.CrawlJob;
-import io.github.suryadeepkoduri.crawler.model.FetchResult;
-import io.github.suryadeepkoduri.crawler.model.ParsedPage;
-import io.github.suryadeepkoduri.crawler.repository.CrawlRepository;
-
 public class CrawlerOrchestrator {
+
     private final CrawlRepository crawlRepository;
     private final PageFetcher pageFetcher;
     private final PageParser pageParser;
@@ -24,11 +23,18 @@ public class CrawlerOrchestrator {
     private final int batchSize;
     private final int maxDepth;
 
-    private final Logger log = LoggerFactory.getLogger(CrawlerOrchestrator.class);
+    private final Logger log = LoggerFactory.getLogger(
+        CrawlerOrchestrator.class
+    );
 
-    public CrawlerOrchestrator(CrawlRepository crawlRepository, PageFetcher pageFetcher, PageParser pageParser,
-            RulesEngine rulesEngine,
-            int maxDepth, int batchSize) {
+    public CrawlerOrchestrator(
+        CrawlRepository crawlRepository,
+        PageFetcher pageFetcher,
+        PageParser pageParser,
+        RulesEngine rulesEngine,
+        int maxDepth,
+        int batchSize
+    ) {
         this.crawlRepository = crawlRepository;
         this.pageFetcher = pageFetcher;
         this.pageParser = pageParser;
@@ -44,7 +50,9 @@ public class CrawlerOrchestrator {
 
         while (true) {
             if (localQueue.isEmpty()) {
-                List<CrawlJob> batch = crawlRepository.getNextPendingBatch(batchSize);
+                List<CrawlJob> batch = crawlRepository.getNextPendingBatch(
+                    batchSize
+                );
 
                 if (batch.isEmpty()) {
                     log.info("Crawl Complete");
@@ -60,7 +68,6 @@ public class CrawlerOrchestrator {
     }
 
     private void process(CrawlJob job) {
-    
         if (!rulesEngine.isAllowed(job.url())) {
             log.info("Skipping url due to robots.txt rules: {}", job.url());
             crawlRepository.markNotAllowed(job.pageId());
@@ -83,12 +90,13 @@ public class CrawlerOrchestrator {
     }
 
     private void processDiscoveredLinks(CrawlJob job, List<String> rawLinks) {
-        List<String> cleanLinks = rawLinks.stream()
-                .map(UrlProcessor::normalize)
-                .filter(Objects::nonNull)
-                .filter(rulesEngine::isAllowed)
-                .distinct()
-                .toList();
+        List<String> cleanLinks = rawLinks
+            .stream()
+            .map(UrlProcessor::normalize)
+            .filter(Objects::nonNull)
+            .filter(rulesEngine::isAllowed)
+            .distinct()
+            .toList();
 
         if (cleanLinks.isEmpty()) {
             return;
@@ -96,14 +104,19 @@ public class CrawlerOrchestrator {
 
         int childDepth = job.depth() + 1;
 
-        Map<String, Integer> newIds = crawlRepository.batchInsertUrls(cleanLinks, childDepth);
+        Map<String, Integer> newIds = crawlRepository.batchInsertUrls(
+            cleanLinks,
+            childDepth
+        );
 
-        List<String> alreadyExisted = cleanLinks.stream()
-                .filter(url -> !newIds.containsKey(url))
-                .toList();
+        List<String> alreadyExisted = cleanLinks
+            .stream()
+            .filter(url -> !newIds.containsKey(url))
+            .toList();
 
-        Map<String, Integer> existingIds = alreadyExisted.isEmpty() ? Map.of()
-                : crawlRepository.getIdsByUrls(alreadyExisted);
+        Map<String, Integer> existingIds = alreadyExisted.isEmpty()
+            ? Map.of()
+            : crawlRepository.getIdsByUrls(alreadyExisted);
 
         Map<String, Integer> allIds = new HashMap<>();
         allIds.putAll(newIds);

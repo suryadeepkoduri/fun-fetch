@@ -4,11 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IndexOrchestrator {
+
     private final Indexer indexer;
     private final IndexRepository indexRepository;
     Queue<Integer> localQueue = new LinkedList<>();
@@ -33,7 +33,9 @@ public class IndexOrchestrator {
 
             int pageId = localQueue.poll();
             log.info("Indexing pageId: {}", pageId);
-            Map<String, Integer> freqs = indexer.index(indexRepository.fetchPageContent(pageId));
+            Map<String, Integer> freqs = indexer.index(
+                indexRepository.fetchPageContent(pageId)
+            );
 
             indexRepository.addIndex(pageId, freqs);
         }

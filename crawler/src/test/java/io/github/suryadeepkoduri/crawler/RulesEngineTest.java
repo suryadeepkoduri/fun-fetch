@@ -22,25 +22,24 @@ class RulesEngineTest {
     @Test
     void disallowedPathIsBlocked() {
         String robotsTxt = "User-agent: *\nDisallow: /private/";
-        Mockito.when(mockFetcher.fetch(any()))
-               .thenReturn(robotsTxt.getBytes());
+        Mockito.when(mockFetcher.fetch(any())).thenReturn(robotsTxt.getBytes());
 
-        assertFalse(rulesEngine.isAllowed("https://example.com/private/secret"));
+        assertFalse(
+            rulesEngine.isAllowed("https://example.com/private/secret")
+        );
     }
 
     @Test
     void allowedPathPassesThrough() {
         String robotsTxt = "User-agent: *\nDisallow: /private/";
-        Mockito.when(mockFetcher.fetch(any()))
-               .thenReturn(robotsTxt.getBytes());
+        Mockito.when(mockFetcher.fetch(any())).thenReturn(robotsTxt.getBytes());
 
         assertTrue(rulesEngine.isAllowed("https://example.com/public/page"));
     }
 
     @Test
     void emptyRobotsTxtAllowsEverything() {
-        Mockito.when(mockFetcher.fetch(any()))
-               .thenReturn(new byte[]{});
+        Mockito.when(mockFetcher.fetch(any())).thenReturn(new byte[] {});
 
         assertTrue(rulesEngine.isAllowed("https://example.com/anything"));
     }
@@ -48,8 +47,7 @@ class RulesEngineTest {
     @Test
     void robotsTxtIsCachedAndFetchedOnlyOnce() {
         String robotsTxt = "User-agent: *\nDisallow: /private/";
-        Mockito.when(mockFetcher.fetch(any()))
-               .thenReturn(robotsTxt.getBytes());
+        Mockito.when(mockFetcher.fetch(any())).thenReturn(robotsTxt.getBytes());
 
         rulesEngine.isAllowed("https://example.com/page1");
         rulesEngine.isAllowed("https://example.com/page2");
@@ -61,8 +59,7 @@ class RulesEngineTest {
     @Test
     void differentDomainsEachFetchTheirOwnRobotsTxt() {
         String robotsTxt = "User-agent: *\nDisallow:";
-        Mockito.when(mockFetcher.fetch(any()))
-               .thenReturn(robotsTxt.getBytes());
+        Mockito.when(mockFetcher.fetch(any())).thenReturn(robotsTxt.getBytes());
 
         rulesEngine.isAllowed("https://example.com/page");
         rulesEngine.isAllowed("https://other.com/page");
