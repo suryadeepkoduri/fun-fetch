@@ -1,7 +1,7 @@
 package io.github.suryadeepkoduri.search.controller;
 
-import io.github.suryadeepkoduri.search.SearchResult;
 import io.github.suryadeepkoduri.search.SearchService;
+import io.github.suryadeepkoduri.search.model.SearchResult;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
